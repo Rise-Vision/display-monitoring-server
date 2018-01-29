@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers, default-case */
+/* eslint-disable no-magic-numbers */
 
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
 let currentDisplayStates = {};
@@ -15,48 +15,44 @@ function filterSilentStates(list) {
   currentDisplayStates = filteredDisplayStates;
 }
 
-function updateAsOnline(entry) {
-  switch (entry.state) {
-    case 'ALERTED':
-      Object.assign(entry, {state: 'RECOVERING', count: 1});
-      return null;
-
-    case 'RECOVERING':
-      if (entry.count === 2) {
-        entry.state = 'OK';
-        return "SEND_RECOVERY_EMAIL";
-      }
-
-      entry.count = 2;
-      return null;
-
-    case 'FAILED':
-      entry.state = 'OK';
-  }
+function change(entry, state) {
+  Object.assign(entry, {state, count: 0});
 
   return null;
 }
 
-function updateAsOffline(entry) {
+function updateAsOnline(entry) {
   switch (entry.state) {
-    case 'OK':
-      Object.assign(entry, {state: 'FAILED', count: 1});
+    case 'ALERTED': return change(entry, 'RECOVERING');
+    case 'RECOVERING':
+      if (entry.count >= 2) {
+        change(entry, 'OK');
+        return "SEND_RECOVERY_EMAIL";
+      }
+
+      entry.count += 1;
       return null;
 
+    case 'FAILED': return change(entry, 'OK');
+    default: return null;
+  }
+}
+
+function updateAsOffline(entry) {
+  switch (entry.state) {
+    case 'OK': return change(entry, 'FAILED');
     case 'FAILED':
-      if (entry.count === 2) {
-        entry.state = 'ALERTED';
+      if (entry.count >= 2) {
+        change(entry, 'ALERTED');
         return "SEND_FAILURE_EMAIL";
       }
 
-      entry.count = 2;
+      entry.count += 1;
       return null;
 
-    case 'RECOVERING':
-      entry.state = 'ALERTED';
+    case 'RECOVERING': return change(entry, 'ALERTED');
+    default: return null;
   }
-
-  return null;
 }
 
 function updateDisplayStatus(displayId, online) {
@@ -65,7 +61,7 @@ function updateDisplayStatus(displayId, online) {
   if (!displayState) {
     currentDisplayStates[displayId] = {
       state: online ? 'OK' : 'FAILED',
-      count: 1
+      count: 0
     };
 
     return null;

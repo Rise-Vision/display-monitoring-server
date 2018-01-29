@@ -31,21 +31,21 @@ describe("State Manager - Unit", ()=>{
 
     {
       const states = stateManager.getCurrentDisplayStates();
-      assert.deepEqual(states, {A123: {state: 'OK', count: 1}})
+      assert.deepEqual(states, {A123: {state: 'OK', count: 0}})
     }
 
     stateManager.updateDisplayStatus("A123", false);
 
     {
       const states = stateManager.getCurrentDisplayStates();
-      assert.deepEqual(states, {A123: {state: 'FAILED', count: 1}})
+      assert.deepEqual(states, {A123: {state: 'FAILED', count: 0}})
     }
 
     stateManager.updateDisplayStatus("A123", true);
 
     {
       const states = stateManager.getCurrentDisplayStates();
-      assert.deepEqual(states, {A123: {state: 'OK', count: 1}})
+      assert.deepEqual(states, {A123: {state: 'OK', count: 0}})
     }
   });
 
