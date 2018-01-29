@@ -1,0 +1,36 @@
+{
+  "name": "monitoring-server",
+  "version": "0.0.1",
+  "description": "Rise Vision Display Monitoring Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint . && mocha -t 15000 -r test/mocha-env.js test/**",
+    "test-unit": "eslint . && mocha -t 15000 -r test/mocha-env.js test/unit/**",
+    "test-integration": "eslint . && mocha -t 15000 -r test/mocha-env.js test/integration/**",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rise-Vision/monitoring-server.git"
+  },
+  "keywords": [
+    "display",
+    "monitoring"
+  ],
+  "author": "Rise Vision",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rise-Vision/monitoring-server/issues"
+  },
+  "homepage": "https://github.com/Rise-Vision/monitoring-server#readme",
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "mocha": "^4.0.1",
+    "simple-mock": "^0.8.0"
+  }
+}
