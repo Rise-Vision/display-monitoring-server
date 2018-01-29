@@ -2,7 +2,7 @@
 const assert = require("assert");
 const runner = require("../../src/query-runner.js");
 
-describe("QueryRunner", ()=>{
+describe("QueryRunner - Unit", ()=>{
   it("exists", ()=>{
     assert(runner);
   });
