@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable no-magic-numbers, default-case */
 
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
 let currentDisplayStates = {};
@@ -16,7 +16,7 @@ function filterSilentStates(list) {
 }
 
 function change(entry, state) {
-  Object.assign(entry, {state, count: 0});
+  Object.assign(entry, {state, count: 1});
 
   return null;
 }
@@ -24,6 +24,7 @@ function change(entry, state) {
 function updateAsOnline(entry) {
   switch (entry.state) {
     case 'ALERTED': return change(entry, 'RECOVERING');
+    case 'FAILED': return change(entry, 'OK');
     case 'RECOVERING':
       if (entry.count >= 2) {
         change(entry, 'OK');
@@ -31,16 +32,15 @@ function updateAsOnline(entry) {
       }
 
       entry.count += 1;
-      return null;
-
-    case 'FAILED': return change(entry, 'OK');
-    default: return null;
   }
+
+  return null;
 }
 
 function updateAsOffline(entry) {
   switch (entry.state) {
     case 'OK': return change(entry, 'FAILED');
+    case 'RECOVERING': return change(entry, 'ALERTED');
     case 'FAILED':
       if (entry.count >= 2) {
         change(entry, 'ALERTED');
@@ -48,11 +48,9 @@ function updateAsOffline(entry) {
       }
 
       entry.count += 1;
-      return null;
-
-    case 'RECOVERING': return change(entry, 'ALERTED');
-    default: return null;
   }
+
+  return null;
 }
 
 function updateDisplayStatus(displayId, online) {
@@ -61,7 +59,7 @@ function updateDisplayStatus(displayId, online) {
   if (!displayState) {
     currentDisplayStates[displayId] = {
       state: online ? 'OK' : 'FAILED',
-      count: 0
+      count: 1
     };
 
     return null;
