@@ -2,7 +2,7 @@
 
 const stateManager = require("./state-manager");
 
-function updateDisplayStatusList(list) {
+function updateDisplayStatusListAndNotify(list) {
   stateManager.filterSilentStates(list);
 
   list.forEach(({displayId, online, addresses}) => {
@@ -29,5 +29,5 @@ function sendRecoveryEmail(displayId, addresses) {
 module.exports = {
   sendFailureEmail,
   sendRecoveryEmail,
-  updateDisplayStatusList
+  updateDisplayStatusListAndNotify
 };

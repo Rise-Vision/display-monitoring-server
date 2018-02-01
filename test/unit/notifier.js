@@ -30,7 +30,7 @@ describe("Notifier - Unit", () => {
       }
     })
 
-    notifier.updateDisplayStatusList([
+    notifier.updateDisplayStatusListAndNotify([
       {
         displayId: 'ABC', online: true, addresses: ['a@example.com']
       },
