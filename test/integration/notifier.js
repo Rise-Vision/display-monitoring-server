@@ -73,7 +73,6 @@ describe("Notifier - Integration", () => {
       }
     ]);
 
-    assert(notifier.sendFailureEmail.called);
     assert(!notifier.sendRecoveryEmail.called);
 
     assert.equal(notifier.sendFailureEmail.callCount, 1);
@@ -194,7 +193,6 @@ describe("Notifier - Integration", () => {
       }
     ]);
 
-    assert(notifier.sendRecoveryEmail.called);
     assert.equal(notifier.sendFailureEmail.callCount, 2);
 
     assert.equal(notifier.sendRecoveryEmail.callCount, 1);
