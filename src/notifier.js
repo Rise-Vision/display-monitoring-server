@@ -1,3 +1,5 @@
+/* eslint-disable default-case, no-unused-vars */
+
 const stateManager = require("./state-manager");
 
 function updateDisplayStatusList(list) {
@@ -6,7 +8,7 @@ function updateDisplayStatusList(list) {
   list.forEach(({displayId, online, addresses}) => {
     const action = stateManager.updateDisplayStatus(displayId, online);
 
-    switch(action) {
+    switch (action) {
       case "SEND_FAILURE_EMAIL":
         return module.exports.sendFailureEmail(displayId, addresses);
 
@@ -17,9 +19,11 @@ function updateDisplayStatusList(list) {
 }
 
 function sendFailureEmail(displayId, addresses) {
+  // implement when external email service is decided...
 }
 
 function sendRecoveryEmail(displayId, addresses) {
+  // implement when external email service is decided...
 }
 
 module.exports = {
