@@ -9,6 +9,7 @@ const monitoringInterval = 5 * MINUTES;
 
 require("assert")(notifier);
 require("assert")(runner);
+require("assert")(stateRetriever);
 
 function generateStatusList(displays, onlineDisplayIds) {
   return displays.map(display => {
