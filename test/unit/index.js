@@ -18,9 +18,7 @@ describe("Main - Unit", () => {
       }
     ];
 
-    const onlineDisplayIds = ['ABC', 'GHI'];
-
-    const statusList = monitoring.generateStatusList(displays, onlineDisplayIds);
+    const statusList = monitoring.generateStatusList(displays, [1, 0, 1]);
 
     assert.deepEqual(statusList, [
       {
@@ -48,7 +46,7 @@ describe("Main - Unit", () => {
       }
     ];
 
-    const statusList = monitoring.generateStatusList(displays, []);
+    const statusList = monitoring.generateStatusList(displays, [0, 0, 0]);
 
     assert.deepEqual(statusList, [
       {

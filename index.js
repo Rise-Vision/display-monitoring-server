@@ -9,13 +9,9 @@ const monitoringInterval = 5 * MINUTES;
 
 let timerId = null;
 
-require("assert")(notifier);
-require("assert")(runner);
-require("assert")(stateRetriever);
-
-function generateStatusList(displays, onlineDisplayIds) {
-  return displays.map(display => {
-    const online = onlineDisplayIds.includes(display.displayId);
+function generateStatusList(displays, states) {
+  return displays.map((display, index) => {
+    const online = states[index] === 1;
 
     return Object.assign({online}, display);
   });
@@ -27,8 +23,8 @@ function monitorDisplays() {
     const displayIds = displays.map(display => display.displayId);
 
     return stateRetriever.retrieveState(displayIds)
-    .then(onlineDisplayIds => {
-      const statusList = generateStatusList(displays, onlineDisplayIds);
+    .then(states => {
+      const statusList = generateStatusList(displays, states);
 
       return notifier.updateDisplayStatusListAndNotify(statusList);
     });

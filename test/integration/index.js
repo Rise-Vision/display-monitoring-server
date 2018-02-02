@@ -34,19 +34,19 @@ describe("Main - Integration", () => {
 
   it("should iterate and notify accordingly", done => {
 
-    const onlineDisplayIds = [
-      ['ABC'],
-      ['GHI'],
-      [],
-      ['ABC'],
-      ['ABC', 'DEF'],
-      ['DEF', 'GHI'],
-      ['GHI'],
-      ['ABC', 'GHI']
+    const states = [
+      [1, 0, 0],
+      [0, 0, 1],
+      [0, 0, 0],
+      [1, 0, 0],
+      [1, 1, 0],
+      [0, 1, 1],
+      [0, 0, 1],
+      [1, 0, 1]
     ];
 
     simple.mock(stateRetriever, "retrieveState").callFn(() =>
-      Promise.resolve(onlineDisplayIds.shift())
+      Promise.resolve(states.shift())
     );
 
     monitoring.run((action, interval) => {
