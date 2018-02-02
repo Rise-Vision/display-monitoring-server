@@ -9,7 +9,7 @@ const ONE_HOUR = 3580000;
 let refreshDate = 0;
 let token = null;
 
-function refreshToken() {
+function refreshToken(request) {
   const now = new Date();
 
   if (now - refreshDate < ONE_HOUR) {
@@ -18,7 +18,7 @@ function refreshToken() {
 
   const options = {method: "POST", json: true};
 
-  return got(config.REFRESH_URL, options)
+  return request(config.REFRESH_URL, options)
   .then(response => {
     refreshDate = now;
 
@@ -26,7 +26,7 @@ function refreshToken() {
   });
 }
 
-function invokeQuery() {
+function invokeQuery(request) {
   const options = {
     method: "POST",
     headers: {
@@ -36,7 +36,7 @@ function invokeQuery() {
     json: true
   };
 
-  return got(config.QUERY_URL, options)
+  return request(config.QUERY_URL, options)
   .then(response => {
     const data = response.body
 
@@ -55,9 +55,9 @@ function asDisplayList(data) {
   });
 }
 
-function readMonitoredDisplays() {
-  return module.exports.refreshToken()
-  .then(module.exports.invokeQuery)
+function readMonitoredDisplays(request = got) {
+  return module.exports.refreshToken(request)
+  .then(() => module.exports.invokeQuery(request))
   .then(asDisplayList);
 }
 
