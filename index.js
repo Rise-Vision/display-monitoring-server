@@ -20,6 +20,12 @@ function generateStatusList(displays, states) {
 function monitorDisplays() {
   return runner.readMonitoredDisplays()
   .then(displays => {
+    if (displays.length === 0) {
+      console.warn("No monitored displays found");
+
+      return;
+    }
+
     const displayIds = displays.map(display => display.displayId);
 
     return stateRetriever.retrieveState(displayIds)

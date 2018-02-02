@@ -14,6 +14,14 @@ describe("Main - Integration", () => {
   beforeEach(() => {
     simple.mock(notifier, "sendFailureEmail").returnWith();
     simple.mock(notifier, "sendRecoveryEmail").returnWith();
+  });
+
+  afterEach(() => {
+    simple.restore();
+    stateManager.reset();
+  });
+
+  it("should iterate and notify accordingly", done => {
     simple.mock(runner, "readMonitoredDisplays").resolveWith([
       {
         displayId: 'ABC', addresses: ['a@example.com']
@@ -25,14 +33,6 @@ describe("Main - Integration", () => {
         displayId: 'GHI', addresses: ['g@example.com']
       }
     ]);
-  });
-
-  afterEach(() => {
-    simple.restore();
-    stateManager.reset();
-  });
-
-  it("should iterate and notify accordingly", done => {
 
     const states = [
       [1, 0, 0],
@@ -160,6 +160,27 @@ describe("Main - Integration", () => {
           'DEF': {state: 'ALERTED', count: 1},
           'GHI': {state: 'OK', count: 1}
         });
+
+        done();
+      })
+    });
+  });
+
+  it("should do nothing if there are not monitored displays", done => {
+    simple.mock(runner, "readMonitoredDisplays").resolveWith([]);
+    simple.mock(stateRetriever, "retrieveState").resolveWith();
+    simple.mock(console, "warn").returnWith();
+
+    monitoring.run((action, interval) => {
+      assert.equal(interval, 300000);
+
+      action().then(() => {
+        assert(!stateRetriever.retrieveState.called);
+
+        assert(console.warn.callCount, 1);
+        assert.equal(console.warn.lastCall.args[0], "No monitored displays found");
+
+        assert.deepEqual(stateManager.getCurrentDisplayStates(), {});
 
         done();
       })
