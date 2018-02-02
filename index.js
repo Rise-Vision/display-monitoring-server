@@ -21,9 +21,7 @@ function monitorDisplays() {
   return runner.readMonitoredDisplays()
   .then(displays => {
     if (displays.length === 0) {
-      console.warn("No monitored displays found");
-
-      return;
+      return console.warn("No monitored displays found");
     }
 
     const displayIds = displays.map(display => display.displayId);
