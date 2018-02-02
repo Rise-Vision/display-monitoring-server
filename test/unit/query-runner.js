@@ -7,14 +7,14 @@ const runner = require("../../src/query-runner.js");
 const SAMPLE_ANSWER_DATA = {
  "kind": "bigquery#queryResponse",
  "schema": {
-  "fields": [
-    {"name": "displayId", "type": "STRING", "mode": "NULLABLE"},
-    {"name": "addresses", "type": "STRING", "mode": "NULLABLE"}
-  ]
+   "fields": [
+      {"name": "displayId", "type": "STRING", "mode": "NULLABLE"},
+      {"name": "addresses", "type": "STRING", "mode": "NULLABLE"}
+   ]
  },
  "jobReference": {
-  "projectId": "client-side-events",
-  "jobId": "job_P4KAg26lemcBCSsKD11ayHdMesPW"
+   "projectId": "client-side-events",
+   "jobId": "job_P4KAg26lemcBCSsKD11ayHdMesPW"
  },
  "totalRows": "2",
  "rows": [
