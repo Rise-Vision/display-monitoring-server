@@ -11,6 +11,18 @@ module.exports = {
     return redisClient.quit();
   },
   retrieveState(ids) {
-    return ids;
+    if (!validParam(ids)) {return invalidParam();}
+
+    const commands = ids.map(displayId=>["sismember", "connections:id", displayId]);
+
+    return redisClient.batch(commands);
   }
 };
+
+function validParam(ids) {
+  return ids && Array.isArray(ids) && ids.length;
+}
+
+function invalidParam() {
+  return Promise.reject(Error("Expected an array with at least one element"));
+}
