@@ -1,8 +1,8 @@
-const emailer = require("./src/emailer.js");
+const notifier = require("./src/notifier.js");
 const runner = require("./src/query-runner.js");
 const temporaryInterval = 60000;
 
-require("assert")(emailer);
+require("assert")(notifier);
 require("assert")(runner);
 
 setInterval(temporaryHeartbeat, temporaryInterval);
