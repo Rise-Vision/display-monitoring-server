@@ -76,7 +76,6 @@ describe("Notifier - Unit", () => {
       statusCode: 200,
       body: '{"success": true}'
     });
-    simple.mock(console, "log").returnWith();
 
     return notifier.sendFailureEmail('ABC', ['a@example.com', 'b@example.com'])
     .then(() => {
@@ -104,7 +103,6 @@ describe("Notifier - Unit", () => {
       statusCode: 200,
       body: '{"success": true}'
     });
-    simple.mock(console, "log").returnWith();
 
     return notifier.sendRecoveryEmail('DEF', ['d@example.com'])
     .then(() => {
