@@ -7,6 +7,7 @@ const stateManager = require("./state-manager");
 const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "support@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
+const RESPONSE_OK = 200;
 
 const templates = {
   'failure': {
@@ -18,8 +19,6 @@ const templates = {
     body: loadTemplate("recovery")
   }
 };
-
-const RESPONSE_OK = 200;
 
 function loadTemplate(name) {
   const path = require.resolve(`./templates/${name}.txt`);
