@@ -1,4 +1,3 @@
-/* eslint-disable default-case */
 const fs = require("fs");
 const got = require("got");
 const querystring = require("querystring");
@@ -37,6 +36,8 @@ function updateDisplayStatusListAndNotify(list) {
 
       case "SEND_RECOVERY_EMAIL":
         return module.exports.sendRecoveryEmail(displayId, addresses);
+
+      default:
     }
   });
 }
