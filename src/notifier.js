@@ -48,31 +48,32 @@ function updateDisplayStatusListAndNotify(list) {
 }
 
 function sendFailureEmail(displayId, addresses) {
-  return prepareContentAndSendEmail(templates.failure, displayId, addresses);
+  return prepareAndSendEmail(templates.failure, displayId, addresses);
 }
 
 function sendRecoveryEmail(displayId, addresses) {
-  return prepareContentAndSendEmail(templates.recovery, displayId, addresses);
+  return prepareAndSendEmail(templates.recovery, displayId, addresses);
 }
 
-function prepareContentAndSendEmail(template, displayId, recipients) {
+function prepareAndSendEmail(template, displayId, recipients) {
   const subject = template.subject.replace('DISPLAYID', displayId);
   const text = template.body.replace(/DISPLAYID/g, displayId);
 
-  return sendEmail(subject, text, recipients)
-  .catch(console.warn);
-}
-
-function sendEmail(subject, text, recipients) {
-  const data = querystring.stringify({
+  const data = {
     from: SENDER_ADDRESS,
     fromName: SENDER_NAME,
     recipients,
     subject,
     text
-  });
+  };
 
-  const url = `${EMAIL_API_URL}?${data}`;
+  return send(data)
+  .catch(console.warn);
+}
+
+function send(data) {
+  const parameterString = querystring.stringify(data);
+  const url = `${EMAIL_API_URL}?${parameterString}`;
 
   return got.post(url)
   .then(response =>
@@ -81,7 +82,7 @@ function sendEmail(subject, text, recipients) {
       return logErrorDataFor(response, url);
     }
 
-    console.log(`Mail '${subject}' sent to ${recipients.join()}`);
+    console.log(`Mail '${data.subject}' sent to ${data.recipients.join()}`);
 
     return JSON.parse(response.body);
   });
@@ -100,7 +101,6 @@ function logErrorDataFor(response, url) {
 }
 
 module.exports = {
-  sendEmail,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify
