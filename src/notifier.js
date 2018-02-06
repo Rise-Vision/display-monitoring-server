@@ -2,8 +2,11 @@ const fs = require("fs");
 const got = require("got");
 const querystring = require("querystring");
 
-const config = require("./config");
 const stateManager = require("./state-manager");
+
+const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
+const SENDER_ADDRESS = "support@risevision.com";
+const SENDER_NAME = "Rise Vision Support";
 
 const templates = {
   'failure': {
@@ -62,14 +65,14 @@ function prepareContentAndSendEmail(template, displayId, recipients) {
 
 function sendEmail(subject, text, recipients) {
   const data = querystring.stringify({
-    from: config.SENDER_ADDRESS,
-    fromName: config.SENDER_NAME,
+    from: SENDER_ADDRESS,
+    fromName: SENDER_NAME,
     recipients,
     subject,
     text
   });
 
-  const url = `${config.EMAIL_URL}?${data}`;
+  const url = `${EMAIL_API_URL}?${data}`;
 
   return got.post(url)
   .then(response =>
