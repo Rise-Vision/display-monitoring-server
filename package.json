@@ -34,7 +34,7 @@
     "simple-mock": "^0.8.0"
   },
   "dependencies": {
-    "got": "^8.0.3",
+    "@google-cloud/bigquery": "^1.0.0",
     "redis": "^2.8.0"
   }
 }

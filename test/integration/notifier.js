@@ -3,8 +3,8 @@
 const assert = require("assert");
 const simple = require("simple-mock");
 
-const notifier = require("../../src/notifier");
-const stateManager = require("../../src/state-manager");
+const notifier = require("../../src/notifier.js");
+const stateManager = require("../../src/state-manager.js");
 
 describe("Notifier - Integration", () => {
 
