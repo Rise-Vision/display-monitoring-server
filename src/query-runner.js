@@ -24,7 +24,7 @@ function getClient(testClient) {
 
 function invokeQuery(testClient) {
   const invoker = getClient(testClient);
-  const options = {query, useLegacySql: false, useQueryCache: true};
+  const options = {query, useLegacySql: false, useQueryCache: false};
 
   return invoker.query(options);
 }
