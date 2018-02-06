@@ -27,19 +27,21 @@ function loadTemplate(name) {
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterSilentStates(list);
 
-  list.forEach(({displayId, online, addresses}) => {
-    const action = stateManager.updateDisplayStatus(displayId, online);
+  return list.reduce((promise, {displayId, online, addresses}) => {
+    return promise.then(() => {
+      const action = stateManager.updateDisplayStatus(displayId, online);
 
-    switch (action) {
-      case "SEND_FAILURE_EMAIL":
-        return module.exports.sendFailureEmail(displayId, addresses);
+      switch (action) {
+        case "SEND_FAILURE_EMAIL":
+          return module.exports.sendFailureEmail(displayId, addresses);
 
-      case "SEND_RECOVERY_EMAIL":
-        return module.exports.sendRecoveryEmail(displayId, addresses);
+        case "SEND_RECOVERY_EMAIL":
+          return module.exports.sendRecoveryEmail(displayId, addresses);
 
-      default:
-    }
-  });
+        default:
+      }
+    })
+  }, Promise.resolve());
 }
 
 function sendFailureEmail(displayId, addresses) {
@@ -54,7 +56,8 @@ function prepareContentAndSendEmail(template, displayId, recipients) {
   const subject = template.subject.replace('DISPLAYID', displayId);
   const text = template.body.replace(/DISPLAYID/g, displayId);
 
-  return sendEmail(subject, text, recipients);
+  return sendEmail(subject, text, recipients)
+  .catch(console.warn);
 }
 
 function sendEmail(subject, text, recipients) {
@@ -66,12 +69,9 @@ function sendEmail(subject, text, recipients) {
     text
   });
 
-  const url = `${config.EMAIL_URL}?${data}`
-  const options = {
-    headers: {"Content-Type": "application/x-www-form-urlencoded"}
-  };
+  const url = `${config.EMAIL_URL}?${data}`;
 
-  return got.post(url, options)
+  return got.post(url)
   .then(response =>
   {
     if (response.statusCode !== RESPONSE_OK) {

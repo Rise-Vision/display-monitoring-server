@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 /* eslint-disable array-bracket-newline, max-statements, no-magic-numbers */
 const assert = require("assert");
+const got = require("got");
+const querystring = require("querystring");
 const simple = require("simple-mock");
 
 const notifier = require("../../src/notifier.js");
@@ -10,8 +12,6 @@ describe("Notifier - Unit", () => {
 
   beforeEach(() => {
     simple.mock(stateManager, "filterSilentStates").returnWith();
-    simple.mock(notifier, "sendFailureEmail").returnWith();
-    simple.mock(notifier, "sendRecoveryEmail").returnWith();
   });
 
   afterEach(() => simple.restore());
@@ -30,7 +30,10 @@ describe("Notifier - Unit", () => {
       }
     })
 
-    notifier.updateDisplayStatusListAndNotify([
+    simple.mock(notifier, "sendFailureEmail").returnWith();
+    simple.mock(notifier, "sendRecoveryEmail").returnWith();
+
+    return notifier.updateDisplayStatusListAndNotify([
       {
         displayId: 'ABC', online: true, addresses: ['a@example.com']
       },
@@ -40,31 +43,88 @@ describe("Notifier - Unit", () => {
       {
         displayId: 'GHI', online: true, addresses: ['g@example.com']
       }
-    ]);
+    ])
+    .then(() => {
+      assert(stateManager.updateDisplayStatus.called);
+      assert.equal(stateManager.updateDisplayStatus.callCount, 3);
+      const calls = stateManager.updateDisplayStatus.calls;
 
-    assert(stateManager.updateDisplayStatus.called);
-    assert.equal(stateManager.updateDisplayStatus.callCount, 3);
-    const calls = stateManager.updateDisplayStatus.calls;
+      assert.deepEqual(calls[0].args, ['ABC', true]);
+      assert.deepEqual(calls[1].args, ['DEF', false]);
+      assert.deepEqual(calls[2].args, ['GHI', true]);
 
-    assert.deepEqual(calls[0].args, ['ABC', true]);
-    assert.deepEqual(calls[1].args, ['DEF', false]);
-    assert.deepEqual(calls[2].args, ['GHI', true]);
+      assert(!calls[0].returned);
+      assert.equal(calls[1].returned, "SEND_FAILURE_EMAIL");
+      assert.equal(calls[2].returned, "SEND_RECOVERY_EMAIL");
 
-    assert(!calls[0].returned);
-    assert.equal(calls[1].returned, "SEND_FAILURE_EMAIL");
-    assert.equal(calls[2].returned, "SEND_RECOVERY_EMAIL");
+      assert(notifier.sendFailureEmail.called);
+      assert.equal(notifier.sendFailureEmail.callCount, 1);
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
+        'DEF', ['d@example.com']
+      ]);
 
-    assert(notifier.sendFailureEmail.called);
-    assert.equal(notifier.sendFailureEmail.callCount, 1);
-    assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
-      'DEF', ['d@example.com']
-    ]);
+      assert(notifier.sendRecoveryEmail.called);
+      assert.equal(notifier.sendRecoveryEmail.callCount, 1);
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args, [
+        'GHI', ['g@example.com']
+      ]);
+    });
+  });
 
-    assert(notifier.sendRecoveryEmail.called);
-    assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-    assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args, [
-      'GHI', ['g@example.com']
-    ]);
+  it("should invoke external API to send failure email", () => {
+    simple.mock(got, "post").resolveWith({
+      statusCode: 200,
+      body: '{"success": true}'
+    });
+    simple.mock(console, "log").returnWith();
+
+    return notifier.sendFailureEmail('ABC', ['a@example.com', 'b@example.com'])
+    .then(() => {
+      assert(got.post.called);
+      assert.equal(got.post.callCount, 1);
+
+      const url = got.post.lastCall.args[0];
+
+      const [resource, parameterString] = url.split('?');
+      assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
+
+      const parameters = querystring.parse(parameterString);
+
+      assert.equal(parameters.from, "support@risevision.com");
+      assert.equal(parameters.fromName, "Rise Vision Support");
+      assert.deepEqual(parameters.recipients, ['a@example.com', 'b@example.com']);
+      assert.equal(parameters.subject, "Display ABC is offline");
+      assert.equal(typeof parameters.text, "string");
+      assert(parameters.text.indexOf("ABC") > 0);
+    });
+  });
+
+  it("should invoke external API to send recovery email", () => {
+    simple.mock(got, "post").resolveWith({
+      statusCode: 200,
+      body: '{"success": true}'
+    });
+    simple.mock(console, "log").returnWith();
+
+    return notifier.sendRecoveryEmail('DEF', ['d@example.com'])
+    .then(() => {
+      assert(got.post.called);
+      assert.equal(got.post.callCount, 1);
+
+      const url = got.post.lastCall.args[0];
+
+      const [resource, parameterString] = url.split('?');
+      assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
+
+      const parameters = querystring.parse(parameterString);
+
+      assert.equal(parameters.from, "support@risevision.com");
+      assert.equal(parameters.fromName, "Rise Vision Support");
+      assert.equal(parameters.recipients, 'd@example.com');
+      assert.equal(parameters.subject, "Display DEF is now online");
+      assert.equal(typeof parameters.text, "string");
+      assert(parameters.text.indexOf("DEF") > 0);
+    });
   });
 
 });

@@ -8,6 +8,6 @@ if (recipients.length === 0) {
   throw new Error("No recipient addresses provided");
 }
 
-notifier.sendEmail("test summary", "test\nbody", recipients)
+notifier.sendFailureEmail("ABC", recipients)
 .then(console.log)
 .catch(console.error);
