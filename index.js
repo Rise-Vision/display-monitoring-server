@@ -1,11 +1,9 @@
-/* eslint-disable no-magic-numbers, no-unused-expressions */
-
 const notifier = require("./src/notifier");
 const runner = require("./src/query-runner");
 const stateRetriever = require("./src/connection-state-retriever");
 
 const MINUTES = 60000;
-const monitoringInterval = 5 * MINUTES;
+const monitoringInterval = 5 * MINUTES; // eslint-disable-line no-magic-numbers
 
 let timerId = null;
 
@@ -37,7 +35,9 @@ function monitorDisplays() {
 }
 
 function run(schedule = setInterval) {
-  timerId && clearInterval(timerId);
+  if (timerId) {
+    clearInterval(timerId);
+  }
 
   timerId = schedule(monitorDisplays, monitoringInterval);
 }
