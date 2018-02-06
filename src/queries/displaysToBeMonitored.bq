@@ -18,15 +18,18 @@ create temporary function indexOf(displayId STRING, displayList ARRAY<STRING>)
 create temporary function productionApp()
   returns STRING
     as ('s~rvaserver2');
+    -- as ('dummy');
 
 
 create temporary function currentDate()
   returns DATE
     as (current_date());
+    -- as (date(2018, 2, 2));
 
 create temporary function currentTime()
   returns TIME
     as (current_time());
+    -- as (time(21, 20, 22));
 
 with
 
