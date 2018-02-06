@@ -1,12 +1,45 @@
-const notifier = require("./src/notifier.js");
-const runner = require("./src/query-runner.js");
-const temporaryInterval = 60000;
+const notifier = require("./src/notifier");
+const runner = require("./src/query-runner");
+const stateRetriever = require("./src/connection-state-retriever");
 
-require("assert")(notifier);
-require("assert")(runner);
+const MINUTES = 60000;
+const monitoringInterval = 5 * MINUTES; // eslint-disable-line no-magic-numbers
 
-setInterval(temporaryHeartbeat, temporaryInterval);
+let timerId = null;
 
-function temporaryHeartbeat() {
-  console.log("I'm alive");
+function generateStatusList(displays, states) {
+  return displays.map((display, index) => {
+    const online = states[index] === 1;
+
+    return Object.assign({online}, display);
+  });
 }
+
+function monitorDisplays() {
+  return runner.readMonitoredDisplays()
+  .then(displays => {
+    if (displays.length === 0) {
+      return console.warn("No monitored displays found");
+    }
+
+    const displayIds = displays.map(display => display.displayId);
+
+    return stateRetriever.retrieveState(displayIds)
+    .then(states => {
+      const statusList = generateStatusList(displays, states);
+
+      return notifier.updateDisplayStatusListAndNotify(statusList);
+    });
+  })
+  .catch(console.error);
+}
+
+function run(schedule = setInterval) {
+  if (timerId) {
+    clearInterval(timerId);
+  }
+
+  timerId = schedule(monitorDisplays, monitoringInterval);
+}
+
+module.exports = {generateStatusList, monitorDisplays, run};
