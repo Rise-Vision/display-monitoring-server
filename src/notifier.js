@@ -1,11 +1,29 @@
-/* eslint-disable default-case, no-unused-vars */
+/* eslint-disable default-case */
+const fs = require("fs");
 const got = require("got");
 const querystring = require("querystring");
 
 const config = require("./config");
 const stateManager = require("./state-manager");
 
+const templates = {
+  'failure': {
+    subject: "Display DISPLAYID is offline",
+    body: loadTemplate("failure")
+  },
+  'recovery': {
+    subject: "Display DISPLAYID is now online",
+    body: loadTemplate("recovery")
+  }
+};
+
 const RESPONSE_OK = 200;
+
+function loadTemplate(name) {
+  const path = require.resolve(`./templates/${name}.txt`);
+
+  return fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
+}
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterSilentStates(list);
@@ -24,11 +42,18 @@ function updateDisplayStatusListAndNotify(list) {
 }
 
 function sendFailureEmail(displayId, addresses) {
-  // implement when external email service is decided...
+  return prepareContentAndSendEmail(templates.failure, displayId, addresses);
 }
 
 function sendRecoveryEmail(displayId, addresses) {
-  // implement when external email service is decided...
+  return prepareContentAndSendEmail(templates.recovery, displayId, addresses);
+}
+
+function prepareContentAndSendEmail(template, displayId, recipients) {
+  const subject = template.subject.replace('DISPLAYID', displayId);
+  const text = template.body.replace(/DISPLAYID/g, displayId);
+
+  return sendEmail(subject, text, recipients);
 }
 
 function sendEmail(subject, text, recipients) {
