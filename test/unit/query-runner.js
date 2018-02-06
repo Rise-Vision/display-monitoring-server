@@ -39,6 +39,14 @@ describe("QueryRunner - Unit", () => {
         {displayId: "DEF", addresses: ["d@example.com"]}
       ]);
     });
+
+    it("should not extract anything with an empty query result", () => {
+      const data = [[]];
+
+      const list = runner.asDisplayList(data);
+
+      assert.deepEqual(list, []);
+    });
   });
 
   describe("Invocation Tests", () => {
