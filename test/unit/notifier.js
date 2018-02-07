@@ -11,7 +11,7 @@ const stateManager = require("../../src/state-manager.js");
 describe("Notifier - Unit", () => {
 
   beforeEach(() => {
-    simple.mock(stateManager, "filterSilentStates").returnWith();
+    simple.mock(stateManager, "removeUnmonitoredDisplays").returnWith();
   });
 
   afterEach(() => simple.restore());

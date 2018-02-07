@@ -3,16 +3,12 @@
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
 let currentDisplayStates = {};
 
-function filterSilentStates(list) {
-  const filteredDisplayStates = {};
+function removeUnmonitoredDisplays(list) {
+  const monitoredDisplays = Object.keys(currentDisplayStates);
+  const newIdList = list.reduce((arr, el)=>arr.concat(el.displayId), []);
 
-  list.forEach(entry => {
-    const displayId = entry.displayId;
-
-    filteredDisplayStates[displayId] = currentDisplayStates[displayId];
-  });
-
-  currentDisplayStates = filteredDisplayStates;
+  monitoredDisplays.filter(id=>!newIdList.includes(id))
+  .forEach(id=>Reflect.deleteProperty(currentDisplayStates, id));
 }
 
 function change(entry, state) {
@@ -79,7 +75,7 @@ function reset() {
 }
 
 module.exports = {
-  filterSilentStates,
+  removeUnmonitoredDisplays,
   updateDisplayStatus,
   getCurrentDisplayStates,
   reset
