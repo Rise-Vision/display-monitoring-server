@@ -48,8 +48,8 @@ currentDisplays as
 select 
   D.displayId as displayId, 
   D.companyId as companyId, 
-  monitoringSchedule, 
-  monitoringEmails 
+  ifnull(monitoringSchedule, '') as monitoringSchedule, 
+  monitoringEmails
 from `rise-core-log.coreData.displays` D
 inner join (select max(id) as id, displayId from `rise-core-log.coreData.displays` where appId = productionApp() group by displayId) D1 on D.id = D1.id
 inner join (select companyId from activeProductionCompanies) C on D.companyId = C.companyId
@@ -94,18 +94,40 @@ cross join unnest(CL.playerProAssignedDisplays) as displayId
 
 displaysScheduledToBeMonitored as
 (
-select
-  companyId,
-  displayId,
-  startTime,
-  endTime,
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
+  weekDay.day,
+  weekDay.active,
+  monitoringEmails
+from 
+(
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
   weekDay,
   monitoringEmails
 from parsedDisplays
 cross join unnest(parsedDisplays.weekDays) as weekDay
+where parsedDisplays.weekDays is not null
+UNION ALL
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
+  STRUCT(null, null) as weekDay,
+  monitoringEmails
+from parsedDisplays
+where parsedDisplays.weekDays is null
+)
 where
-  weekDay.active = true and weekDay.day = format_date('%A', currentDate()) and
-  startTime <= currentTime() and currentTime() <= endTime
+  ((weekDay.active = true and weekDay.day = format_date('%A', currentDate())) or (weekDay.active is null and weekDay.day is null)) and
+  ((startTime <= currentTime() or startTime is null) and (currentTime() <= endTime or endTime is null))
 )
 
 select
