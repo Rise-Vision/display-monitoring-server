@@ -29,7 +29,9 @@ function loadTemplate(name) {
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterSilentStates(list);
 
-  return list.reduce((promise, {displayId, online, addresses}) => {
+  return list.reduce((promise, display) => {
+    const {displayId, online, addresses} = display;
+
     return promise.then(() => {
       const action = stateManager.updateDisplayStatus(displayId, online);
 
@@ -43,6 +45,7 @@ function updateDisplayStatusListAndNotify(list) {
         default:
       }
     })
+    .catch(error => console.error(`Error while notifying: ${display}`, error))
   }, Promise.resolve());
 }
 
@@ -66,8 +69,7 @@ function prepareAndSendEmail(template, displayId, recipients) {
     text
   };
 
-  return send(data)
-  .catch(console.warn);
+  return send(data);
 }
 
 function send(data) {
