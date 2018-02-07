@@ -27,7 +27,7 @@ function loadTemplate(name) {
 }
 
 function updateDisplayStatusListAndNotify(list) {
-  stateManager.filterSilentStates(list);
+  stateManager.removeUnmonitoredDisplays(list);
 
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;
@@ -77,8 +77,7 @@ function send(data) {
   const url = `${EMAIL_API_URL}?${parameterString}`;
 
   return got.post(url)
-  .then(response =>
-  {
+  .then(response => {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }

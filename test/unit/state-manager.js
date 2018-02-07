@@ -13,7 +13,7 @@ describe("State Manager - Unit", () => {
     stateManager.updateDisplayStatus("B123", true);
     stateManager.updateDisplayStatus("C123", true);
 
-    stateManager.filterSilentStates([
+    stateManager.removeUnmonitoredDisplays([
       {displayId: "A123", online: true, addresses: ['a@example.com']},
       {displayId: "D123", online: true, addresses: ['d@example.com']},
       {displayId: "E123", online: true, addresses: ['e@example.com']}
