@@ -27,7 +27,7 @@ function loadTemplate(name) {
 }
 
 function updateDisplayStatusListAndNotify(list) {
-  stateManager.filterSilentStates(list);
+  stateManager.filterUnmonitoredDisplays(list);
 
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;

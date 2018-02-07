@@ -3,7 +3,7 @@
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
 let currentDisplayStates = {};
 
-function filterSilentStates(list) {
+function filterUnmonitoredDisplays(list) {
   const filteredDisplayStates = {};
 
   list.forEach(entry => {
@@ -79,7 +79,7 @@ function reset() {
 }
 
 module.exports = {
-  filterSilentStates,
+  filterUnmonitoredDisplays,
   updateDisplayStatus,
   getCurrentDisplayStates,
   reset
