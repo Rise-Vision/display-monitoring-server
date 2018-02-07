@@ -37,10 +37,14 @@ function updateDisplayStatusListAndNotify(list) {
 
       switch (action) {
         case "SEND_FAILURE_EMAIL":
-          return module.exports.sendFailureEmail(displayId, addresses);
+          console.log(`Sending failure email to ${addresses} for ${displayId}`);
+          // module.exports.sendFailureEmail(displayId, addresses);
+          return;
 
         case "SEND_RECOVERY_EMAIL":
-          return module.exports.sendRecoveryEmail(displayId, addresses);
+          console.log(`Sending recovery email to ${addresses} for ${displayId}`);
+          // module.exports.sendRecoveryEmail(displayId, addresses);
+          return; // eslint-disable-line no-useless-return
 
         default:
       }

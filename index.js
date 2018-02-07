@@ -22,12 +22,12 @@ function monitorDisplays() {
       return console.warn("No monitored displays found");
     }
 
+    console.log(`Checking ${displays.length} displays`);
     const displayIds = displays.map(display => display.displayId);
 
     return stateRetriever.retrieveState(displayIds)
     .then(states => {
       const statusList = generateStatusList(displays, states);
-
       return notifier.updateDisplayStatusListAndNotify(statusList);
     });
   })
@@ -43,3 +43,9 @@ function run(schedule = setInterval) {
 }
 
 module.exports = {generateStatusList, monitorDisplays, run};
+
+if (process.env.NODE_ENV !== "test") {
+  console.log(`Monitoring at ${monitoringInterval / MINUTES} minute intervals`);
+  stateRetriever.init();
+  run();
+}
