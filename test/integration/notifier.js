@@ -21,7 +21,7 @@ describe("Notifier - Integration", () => {
   it("should notify or not depending on the current display state", () => {
 
     // first iteration, one display online, two offline
-    notifier.updateDisplayStatusListAndNotify([
+    return notifier.updateDisplayStatusListAndNotify([
       {
         displayId: 'ABC', online: true, addresses: ['a@example.com']
       },
@@ -31,179 +31,187 @@ describe("Notifier - Integration", () => {
       {
         displayId: 'GHI', online: false, addresses: ['g@example.com']
       }
-    ]);
+    ])
+    .then(() => {
+      assert(!notifier.sendFailureEmail.called);
+      assert(!notifier.sendRecoveryEmail.called);
 
-    assert(!notifier.sendFailureEmail.called);
-    assert(!notifier.sendRecoveryEmail.called);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'OK', count: 1},
+        'DEF': {state: 'FAILED', count: 1},
+        'GHI': {state: 'FAILED', count: 1}
+      });
 
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'OK', count: 1},
-      'DEF': {state: 'FAILED', count: 1},
-      'GHI': {state: 'FAILED', count: 1}
-    });
+      // ABC goes offline, DEF continues offline, GHI not followed this time
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: false, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: false, addresses: ['d@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendFailureEmail.called);
+      assert(!notifier.sendRecoveryEmail.called);
 
-    // ABC goes offline, DEF continues offline, GHI not followed this time
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: false, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
-      }
-    ]);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'FAILED', count: 1},
+        'DEF': {state: 'FAILED', count: 2}
+      });
 
-    assert(!notifier.sendFailureEmail.called);
-    assert(!notifier.sendRecoveryEmail.called);
+      // ABC continues offline, DEF two periods offline now, GHI back and offline
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: false, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: false, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: false, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendRecoveryEmail.called);
 
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'FAILED', count: 1},
-      'DEF': {state: 'FAILED', count: 2}
-    });
+      assert.equal(notifier.sendFailureEmail.callCount, 1);
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
+        'DEF', ['d@example.com']
+      ]);
 
-    // ABC continues offline, DEF two periods offline now, GHI back and offline
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: false, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: false, addresses: ['g@example.com']
-      }
-    ]);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'FAILED', count: 2},
+        'DEF': {state: 'ALERTED', count: 1},
+        'GHI': {state: 'FAILED', count: 1}
+      });
 
-    assert(!notifier.sendRecoveryEmail.called);
+      // ABC goes online, DEF still offline, GHI still offline
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: true, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: false, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: false, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendRecoveryEmail.called);
 
-    assert.equal(notifier.sendFailureEmail.callCount, 1);
-    assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
-      'DEF', ['d@example.com']
-    ]);
+      // still not changed
+      assert.equal(notifier.sendFailureEmail.callCount, 1);
 
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'FAILED', count: 2},
-      'DEF': {state: 'ALERTED', count: 1},
-      'GHI': {state: 'FAILED', count: 1}
-    });
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'OK', count: 1},
+        'DEF': {state: 'ALERTED', count: 1},
+        'GHI': {state: 'FAILED', count: 2}
+      });
 
-    // ABC goes online, DEF still offline, GHI still offline
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: true, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: false, addresses: ['g@example.com']
-      }
-    ]);
+      // ABC still online, DEF goes online, GHI offline for two periods now
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: true, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: true, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: false, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendRecoveryEmail.called);
 
-    assert(!notifier.sendRecoveryEmail.called);
+      assert.equal(notifier.sendFailureEmail.callCount, 2);
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
+        'GHI', ['g@example.com']
+      ]);
 
-    // still not changed
-    assert.equal(notifier.sendFailureEmail.callCount, 1);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'OK', count: 1},
+        'DEF': {state: 'RECOVERING', count: 1},
+        'GHI': {state: 'ALERTED', count: 1}
+      });
 
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'OK', count: 1},
-      'DEF': {state: 'ALERTED', count: 1},
-      'GHI': {state: 'FAILED', count: 2}
-    });
+      // ABC goes offline, DEF still online, GHI goes online again
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: false, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: true, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: true, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendRecoveryEmail.called);
+      assert.equal(notifier.sendFailureEmail.callCount, 2);
 
-    // ABC still online, DEF goes online, GHI offline for two periods now
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: true, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: true, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: false, addresses: ['g@example.com']
-      }
-    ]);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'FAILED', count: 1},
+        'DEF': {state: 'RECOVERING', count: 2},
+        'GHI': {state: 'RECOVERING', count: 1}
+      });
 
-    assert(!notifier.sendRecoveryEmail.called);
+      // ABC still offline, DEF goes back offline, GHI still online
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: false, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: false, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: true, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert(!notifier.sendRecoveryEmail.called);
+      assert.equal(notifier.sendFailureEmail.callCount, 2);
 
-    assert.equal(notifier.sendFailureEmail.callCount, 2);
-    assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
-      'GHI', ['g@example.com']
-    ]);
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'FAILED', count: 2},
+        'DEF': {state: 'ALERTED', count: 1},
+        'GHI': {state: 'RECOVERING', count: 2}
+      });
 
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'OK', count: 1},
-      'DEF': {state: 'RECOVERING', count: 1},
-      'GHI': {state: 'ALERTED', count: 1}
-    });
+      // ABC back online, DEF still offline, GHI two periods now in online recovering
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC', online: true, addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF', online: false, addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI', online: true, addresses: ['g@example.com']
+        }
+      ]);
+    })
+    .then(() => {
+      assert.equal(notifier.sendFailureEmail.callCount, 2);
 
-    // ABC goes offline, DEF still online, GHI goes online again
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: false, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: true, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: true, addresses: ['g@example.com']
-      }
-    ]);
+      assert.equal(notifier.sendRecoveryEmail.callCount, 1);
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args, [
+        'GHI', ['g@example.com']
+      ]);
 
-    assert(!notifier.sendRecoveryEmail.called);
-    assert.equal(notifier.sendFailureEmail.callCount, 2);
-
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'FAILED', count: 1},
-      'DEF': {state: 'RECOVERING', count: 2},
-      'GHI': {state: 'RECOVERING', count: 1}
-    });
-
-    // ABC still offline, DEF goes back offline, GHI still online
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: false, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: true, addresses: ['g@example.com']
-      }
-    ]);
-
-    assert(!notifier.sendRecoveryEmail.called);
-    assert.equal(notifier.sendFailureEmail.callCount, 2);
-
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'FAILED', count: 2},
-      'DEF': {state: 'ALERTED', count: 1},
-      'GHI': {state: 'RECOVERING', count: 2}
-    });
-
-    // ABC back online, DEF still offline, GHI two periods now in online recovering
-    notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC', online: true, addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI', online: true, addresses: ['g@example.com']
-      }
-    ]);
-
-    assert.equal(notifier.sendFailureEmail.callCount, 2);
-
-    assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-    assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args, [
-      'GHI', ['g@example.com']
-    ]);
-
-    assert.deepEqual(stateManager.getCurrentDisplayStates(), {
-      'ABC': {state: 'OK', count: 1},
-      'DEF': {state: 'ALERTED', count: 1},
-      'GHI': {state: 'OK', count: 1}
+      assert.deepEqual(stateManager.getCurrentDisplayStates(), {
+        'ABC': {state: 'OK', count: 1},
+        'DEF': {state: 'ALERTED', count: 1},
+        'GHI': {state: 'OK', count: 1}
+      });
     });
   });
 
