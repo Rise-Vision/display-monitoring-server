@@ -10,13 +10,13 @@ const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
 
 const templates = {
-  'failure': {
-    subject: "Display DISPLAYID is offline",
-    body: loadTemplate("failure")
+  "failure": {
+    "subject": "Display DISPLAYID is offline",
+    "body": loadTemplate("failure")
   },
-  'recovery': {
-    subject: "Display DISPLAYID is now online",
-    body: loadTemplate("recovery")
+  "recovery": {
+    "subject": "Display DISPLAYID is now online",
+    "body": loadTemplate("recovery")
   }
 };
 
