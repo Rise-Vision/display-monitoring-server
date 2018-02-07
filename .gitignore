@@ -59,3 +59,4 @@ typings/
 
 # redis db
 dump.rdb
+/.project

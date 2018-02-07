@@ -33,13 +33,28 @@ create temporary function currentTime()
 
 with
 
+activeProductionCompanies as
+(
+select 
+  C.companyId as companyId
+from `rise-core-log.coreData.companies` C
+inner join (select max(id) as id, companyId from `rise-core-log.coreData.companies` where appId = productionApp() group by companyId) C1 on C.id = C1.id
+where appId = productionApp() and companyStatus = 1 and (isTest is null or isTest = false) 
+group by 1
+),
+
 currentDisplays as
 (
-select D.displayId as displayId, D.companyId as companyId, monitoringSchedule, monitoringEmails
+select 
+  D.displayId as displayId, 
+  D.companyId as companyId, 
+  monitoringSchedule, 
+  monitoringEmails 
 from `rise-core-log.coreData.displays` D
 inner join (select max(id) as id, displayId from `rise-core-log.coreData.displays` where appId = productionApp() group by displayId) D1 on D.id = D1.id
-inner join (select max(id), companyId from `rise-core-log.coreData.companies` where appId = productionApp() and companyStatus = 1 and (isTest is null or isTest = false) group by companyId) C on D.companyId = C.companyId
+inner join (select companyId from activeProductionCompanies) C on D.companyId = C.companyId
 where D.appId = productionApp() and D.status = 1 and D.monitoringEnabled = true and ifnull(monitoringEmails, '') != ''
+group by 1, 2, 3, 4
 ),
 
 parsedDisplays as
