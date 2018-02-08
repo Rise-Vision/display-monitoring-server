@@ -20,7 +20,7 @@ describe("Notifier - Unit", () => {
     assert(notifier);
   });
 
-  it("should call email functions depending on state manager individual results", () => {
+  xit("should call email functions depending on state manager individual results", () => {
     simple.mock(stateManager, "updateDisplayStatus").callFn(displayId => {
       switch (displayId) {
         case 'ABC': return null;
