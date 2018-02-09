@@ -8,58 +8,81 @@ create temporary function parseDays(s STRING)
         return [];
       }
     """;
-
+    
 create temporary function indexOf(displayId STRING, displayList ARRAY<STRING>)
     returns FLOAT64
     language js AS """
       return displayList.indexOf(displayId);
     """;
-
+    
 create temporary function productionApp()
   returns STRING
-    as ('s~rvaserver2');
-    -- as ('dummy');
-
-
+    as ('s~rvaserver2'); 
+	--as ('dummy');
+    
 create temporary function currentDate()
   returns DATE
-    as (current_date());
-    -- as (date(2018, 2, 2));
-
-create temporary function currentTime()
+    as (current_date()); 
+    --as (date(2018, 2, 2));
+      
+    
+create temporary function currentWeekDay(offset FLOAT64)
+  returns STRING
+    as (format_timestamp('%A', timestamp_add(current_timestamp(), interval CAST(offset as INT64) minute)));
+    --as ('Friday');
+    
+create temporary function currentTime(offset FLOAT64)
   returns TIME
-    as (current_time());
-    -- as (time(21, 20, 22));
-
+    as (time_add(current_time(), interval CAST(offset as INT64) minute));
+    --as (time(21, 20, 22));
+    
 with
+
+activeProductionCompanies as
+(
+select 
+  C.companyId as companyId,
+  C.timeZoneOffset as timeZoneOffset
+from `rise-core-log.coreData.companies` C
+inner join (select max(id) as id, companyId from `rise-core-log.coreData.companies` where appId = productionApp() group by companyId) C1 on C.id = C1.id
+where appId = productionApp() and companyStatus = 1 and (isTest is null or isTest = false) 
+group by 1, 2
+),
 
 currentDisplays as
 (
-select D.displayId as displayId, D.companyId as companyId, monitoringSchedule, monitoringEmails
+select 
+  D.displayId as displayId, 
+  D.companyId as companyId, 
+  ifnull(monitoringSchedule, '') as monitoringSchedule, 
+  ifnull(monitoringEmails, '') as monitoringEmails,
+  if(D.useCompanyAddress, C.timeZoneOffset, D.timeZoneOffset) as timeZoneOffset
 from `rise-core-log.coreData.displays` D
 inner join (select max(id) as id, displayId from `rise-core-log.coreData.displays` where appId = productionApp() group by displayId) D1 on D.id = D1.id
-inner join (select max(id), companyId from `rise-core-log.coreData.companies` where appId = productionApp() and companyStatus = 1 and (isTest is null or isTest = false) group by companyId) C on D.companyId = C.companyId
+inner join (select companyId, timeZoneOffset from activeProductionCompanies) C on D.companyId = C.companyId
 where D.appId = productionApp() and D.status = 1 and D.monitoringEnabled = true and ifnull(monitoringEmails, '') != ''
+group by 1, 2, 3, 4, 5
 ),
 
 parsedDisplays as
 (
-select
+select 
   displayId,
-  companyId,
-  parse_time("%R", json_extract_scalar(monitoringSchedule, "$.time.start")) as startTime,
-  parse_time("%R", json_extract_scalar(monitoringSchedule, "$.time.end")) as endTime,
-  parseDays(json_extract(monitoringSchedule, "$.week")) as weekDays,
-  monitoringEmails
-from currentDisplays
+  companyId, 
+  parse_time("%R", json_extract_scalar(monitoringSchedule, "$.time.start")) as startTime, 
+  parse_time("%R", json_extract_scalar(monitoringSchedule, "$.time.end")) as endTime, 
+  parseDays(json_extract(monitoringSchedule, "$.week")) as weekDays, 
+  monitoringEmails,
+  timeZoneOffset
+from currentDisplays 
 ),
 
 currentLicenses as
 (
-select
-  CS.companyId as companyId,
-  if(((planSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(planCurrentPeriodEndDate) >= currentDate()) or (planSubscriptionStatus = 'Trial' and date(planTrialExpiryDate) >= currentDate()), planPlayerProLicenseCount, 0) +
-  if(((playerProSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(playerProCurrentPeriodEndDate) >= currentDate()), playerProLicenseCount, 0) as totalLicenses,
+select 
+  CS.companyId as companyId, 
+  if(((planSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(planCurrentPeriodEndDate) >= currentDate()) or (planSubscriptionStatus = 'Trial' and date(planTrialExpiryDate) >= currentDate()), planPlayerProLicenseCount, 0) + 
+  if(((playerProSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(playerProCurrentPeriodEndDate) >= currentDate()), playerProLicenseCount, 0) as totalLicenses, 
   playerProAssignedDisplays
 from `rise-core-log.coreData.companySubscriptions` CS
 inner join (select max(id) as id, companyId from `rise-core-log.coreData.companySubscriptions` where appId = productionApp() group by companyId) CS1 on CS.id = CS1.id
@@ -68,10 +91,10 @@ where CS.appId = productionApp()
 
 displayAuthorizations as
 (
-select
-  companyId,
-  displayId,
-  CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64) as displayIndex,
+select 
+  companyId, 
+  displayId, 
+  CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64) as displayIndex, 
   if(totalLicenses > CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64), true, false) as displayAuthorized
 from currentLicenses CL
 cross join unnest(CL.playerProAssignedDisplays) as displayId
@@ -79,21 +102,46 @@ cross join unnest(CL.playerProAssignedDisplays) as displayId
 
 displaysScheduledToBeMonitored as
 (
-select
-  companyId,
-  displayId,
-  startTime,
-  endTime,
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
+  weekDay.day,
+  weekDay.active,
+  monitoringEmails,
+  timeZoneOffset
+from 
+(
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
   weekDay,
-  monitoringEmails
+  monitoringEmails,
+  timeZoneOffset
 from parsedDisplays
 cross join unnest(parsedDisplays.weekDays) as weekDay
+where parsedDisplays.weekDays is not null
+UNION ALL
+select 
+  companyId, 
+  displayId, 
+  startTime, 
+  endTime, 
+  STRUCT(null, null) as weekDay,
+  monitoringEmails,
+  timeZoneOffset
+from parsedDisplays
+where parsedDisplays.weekDays is null
+)
 where
-  weekDay.active = true and weekDay.day = format_date('%A', currentDate()) and
-  startTime <= currentTime() and currentTime() <= endTime
+  ((weekDay.active = true and weekDay.day = currentWeekDay(timeZoneOffset)) or (weekDay.active is null and weekDay.day is null)) and
+  ((startTime <= currentTime(timeZoneOffset) or startTime is null) and (currentTime(timeZoneOffset) <= endTime or endTime is null))
 )
 
-select
+select 
   DM.displayId as displayId,
   DM.monitoringEmails as monitoringEmails
 from displaysScheduledToBeMonitored DM
