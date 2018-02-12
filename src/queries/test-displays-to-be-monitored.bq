@@ -1,7 +1,7 @@
 #standardSQL
 SELECT
   "fake-email-address-1@example.com, fake-email-address-2@example.com" AS monitoringEmails,
-  displayId
+  display_id displayId
 FROM
   `client-side-events.Player_Data.configuration`
 WHERE
