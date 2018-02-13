@@ -91,7 +91,7 @@ describe("Notifier - Unit", () => {
 
       assert.equal(parameters.from, "support@risevision.com");
       assert.equal(parameters.fromName, "Rise Vision Support");
-      assert.deepEqual(parameters.recipients, 'b@example.com');
+      assert.equal(parameters.recipients, 'b@example.com');
       assert.equal(parameters.subject, "Display ABC is offline");
       assert.equal(typeof parameters.text, "string");
       assert(parameters.text.indexOf("ABC") > 0);
