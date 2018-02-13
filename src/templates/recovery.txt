@@ -1,1 +1,3 @@
 The display with display id 'DISPLAYID' has come back online.
+
+If you no longer wish to receive these notices, you can <a href="http://rvaserver2/monitoring/unsubscribe?email=EMAIL&id=ID>unsubscribe</a>.

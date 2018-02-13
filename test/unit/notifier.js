@@ -80,7 +80,7 @@ describe("Notifier - Unit", () => {
     return notifier.sendFailureEmail('ABC', ['a@example.com', 'b@example.com'])
     .then(() => {
       assert(got.post.called);
-      assert.equal(got.post.callCount, 1);
+      assert.equal(got.post.callCount, 2);
 
       const url = got.post.lastCall.args[0];
 
@@ -91,7 +91,7 @@ describe("Notifier - Unit", () => {
 
       assert.equal(parameters.from, "support@risevision.com");
       assert.equal(parameters.fromName, "Rise Vision Support");
-      assert.deepEqual(parameters.recipients, ['a@example.com', 'b@example.com']);
+      assert.deepEqual(parameters.recipients, 'b@example.com');
       assert.equal(parameters.subject, "Display ABC is offline");
       assert.equal(typeof parameters.text, "string");
       assert(parameters.text.indexOf("ABC") > 0);
