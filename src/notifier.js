@@ -64,16 +64,21 @@ function sendRecoveryEmail(displayId, addresses) {
 function prepareAndSendEmail(template, displayId, recipients) {
   const subject = template.subject.replace('DISPLAYID', displayId);
   const text = template.body.replace(/DISPLAYID/g, displayId);
+  const promises = [];
 
-  const data = {
-    from: SENDER_ADDRESS,
-    fromName: SENDER_NAME,
-    recipients,
-    subject,
-    text
-  };
+  recipients.forEach(recipient=>{
+    const data = {
+      from: SENDER_ADDRESS,
+      fromName: SENDER_NAME,
+      recipients: recipient,
+      subject,
+      text: text.replace("EMAIL", recipient)
+    };
 
-  return send(data);
+    promises.push(send(data));
+  });
+
+  return Promise.all(promises);
 }
 
 function send(data) {
@@ -81,13 +86,12 @@ function send(data) {
   const url = `${EMAIL_API_URL}?${parameterString}`;
 
   return got.post(url)
-  .then(response =>
-  {
+  .then(response => {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }
 
-    console.log(`Mail '${data.subject}' sent to ${data.recipients.join()}`);
+    console.log(`Mail '${data.subject}' sent to ${data.recipient}`);
 
     return JSON.parse(response.body);
   });
