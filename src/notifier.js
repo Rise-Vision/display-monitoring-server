@@ -8,16 +8,11 @@ const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "support@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
+const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
 
 const templates = {
-  "failure": {
-    "subject": "Display DISPLAYID is offline",
-    "body": loadTemplate("failure")
-  },
-  "recovery": {
-    "subject": "Display DISPLAYID is now online",
-    "body": loadTemplate("recovery")
-  }
+  "failure": loadTemplate("failure"),
+  "recovery": loadTemplate("recovery")
 };
 
 function loadTemplate(name) {
@@ -62,8 +57,8 @@ function sendRecoveryEmail(displayId, addresses) {
 }
 
 function prepareAndSendEmail(template, displayId, recipients) {
-  const subject = template.subject.replace('DISPLAYID', displayId);
-  const text = template.body.replace(/DISPLAYID/g, displayId);
+  const subject = SUBJECT_LINE.replace('DISPLAYID', displayId);
+  const text = template.replace(/DISPLAYID/g, displayId);
   const promises = [];
 
   recipients.forEach(recipient=>{
