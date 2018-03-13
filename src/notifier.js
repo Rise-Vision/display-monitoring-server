@@ -1,3 +1,4 @@
+const logger = require("./logger");
 const fs = require("fs");
 const got = require("got");
 const querystring = require("querystring");
@@ -23,7 +24,7 @@ function loadTemplate(name) {
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
-  console.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
+  logger.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
 
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;
@@ -33,11 +34,11 @@ function updateDisplayStatusListAndNotify(list) {
 
       switch (action) {
         case "SEND_FAILURE_EMAIL":
-          console.log(`Sending failure email to ${addresses} for ${displayId}`);
+          logger.log(`Sending failure email to ${addresses} for ${displayId}`);
           return module.exports.sendFailureEmail(displayId, addresses);
 
         case "SEND_RECOVERY_EMAIL":
-          console.log(`Sending recovery email to ${addresses} for ${displayId}`);
+          logger.log(`Sending recovery email to ${addresses} for ${displayId}`);
           return module.exports.sendRecoveryEmail(displayId, addresses);
 
         default:
@@ -73,7 +74,7 @@ function prepareAndSendEmail(template, displayId, recipients) {
   });
 
   return Promise.all(promises)
-  .then(() => console.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
+  .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
 }
 
 function send(data) {
