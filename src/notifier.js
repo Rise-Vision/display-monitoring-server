@@ -71,7 +71,8 @@ function prepareAndSendEmail(template, displayId, recipients) {
     promises.push(send(data));
   });
 
-  return Promise.all(promises);
+  return Promise.all(promises)
+  .then(() => console.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
 }
 
 function send(data) {
@@ -83,8 +84,6 @@ function send(data) {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }
-
-    console.log(`Mail '${data.subject}' sent to ${data.recipients}`);
 
     return JSON.parse(response.body);
   });
