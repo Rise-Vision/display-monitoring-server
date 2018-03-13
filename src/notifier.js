@@ -23,6 +23,7 @@ function loadTemplate(name) {
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
+  console.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
 
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;
