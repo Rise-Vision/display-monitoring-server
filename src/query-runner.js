@@ -3,7 +3,7 @@ const BigQuery = require("@google-cloud/bigquery");
 const fs = require("fs");
 
 let client = null;
-const path = require.resolve('./queries/test-displays-to-be-monitored.bq');
+const path = require.resolve('./queries/displaysToBeMonitored.bq');
 const query = fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
 
 function getQuery() {
