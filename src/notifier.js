@@ -23,6 +23,7 @@ function loadTemplate(name) {
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
+  console.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
 
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;
@@ -71,7 +72,8 @@ function prepareAndSendEmail(template, displayId, recipients) {
     promises.push(send(data));
   });
 
-  return Promise.all(promises);
+  return Promise.all(promises)
+  .then(() => console.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
 }
 
 function send(data) {
@@ -83,8 +85,6 @@ function send(data) {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }
-
-    console.log(`Mail '${data.subject}' sent to ${data.recipient}`);
 
     return JSON.parse(response.body);
   });

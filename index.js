@@ -27,7 +27,10 @@ function monitorDisplays() {
 
     return stateRetriever.retrieveState(displayIds)
     .then(states => {
+      console.log(`States retrieved: ${JSON.stringify(states)}`);
       const statusList = generateStatusList(displays, states);
+      console.log(`Status list generated: ${JSON.stringify(statusList)}`);
+
       return notifier.updateDisplayStatusListAndNotify(statusList);
     });
   })
