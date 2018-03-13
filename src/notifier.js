@@ -84,7 +84,7 @@ function send(data) {
       return logErrorDataFor(response, url);
     }
 
-    console.log(`Mail '${data.subject}' sent to ${data.recipient}`);
+    console.log(`Mail '${data.subject}' sent to ${data.recipients}`);
 
     return JSON.parse(response.body);
   });
