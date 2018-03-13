@@ -6,7 +6,7 @@ const simple = require("simple-mock");
 const notifier = require("../../src/notifier.js");
 const stateManager = require("../../src/state-manager.js");
 
-xdescribe("Notifier - Integration", () => {
+describe("Notifier - Integration", () => {
 
   beforeEach(() => {
     simple.mock(notifier, "sendFailureEmail").returnWith();

@@ -21,7 +21,7 @@ describe("Main - Integration", () => {
     stateManager.reset();
   });
 
-  xit("should iterate and notify accordingly", done => {
+  it("should iterate and notify accordingly", done => {
     simple.mock(runner, "readMonitoredDisplays").resolveWith([
       {
         displayId: 'ABC', addresses: ['a@example.com']
