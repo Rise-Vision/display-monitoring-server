@@ -32,10 +32,10 @@ function invokeQuery(testClient) {
 function asDisplayList(data) {
   const rows = data[0];
 
-  return rows.map(({displayId, monitoringEmails}) => {
+  return rows.map(({displayId, displayName, monitoringEmails, timeZoneOffset}) => {
     const addresses = monitoringEmails.split(/,\s*/);
 
-    return {displayId, addresses};
+    return {displayId, displayName, addresses, timeZoneOffset};
   });
 }
 
