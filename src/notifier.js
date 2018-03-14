@@ -75,7 +75,7 @@ function displayDateFor(display) {
 
 function replace(text, display, displayDate) {
   const formattedTimestamp =
-    dateFormat(displayDate, 'mmm dd yyyy, "at" HH:MMTT');
+    dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
 
   return text.replace(/DISPLAYID/g, display.displayId)
   .replace(/DISPLAYNAME/g, display.displayName)

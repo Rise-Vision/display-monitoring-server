@@ -40,6 +40,9 @@ describe("Notifier - Unit", () => {
 
   describe("Email functions", () => {
     beforeEach(() => {
+      const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
+      simple.mock(notifier, "getServerDate").returnWith(serverDate);
+
       simple.mock(stateManager, "filterUnmonitoredDisplays").returnWith();
     });
 
@@ -65,12 +68,14 @@ describe("Notifier - Unit", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: false,
+          timeZoneOffset: 0,
           addresses: ['d@example.com']
         },
         {
@@ -95,14 +100,16 @@ describe("Notifier - Unit", () => {
 
         assert(notifier.sendFailureEmail.called);
         assert.equal(notifier.sendFailureEmail.callCount, 1);
-        assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
-        assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
+        assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+        assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
+        assert.equal(notifier.sendFailureEmail.lastCall.args[0].timeZoneOffset, 0);
         assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
         assert(notifier.sendRecoveryEmail.called);
         assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-        assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
-        assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
+        assert.equal(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+        assert.equal(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
+        assert(!notifier.sendRecoveryEmail.lastCall.args[0].timeZoneOffset);
         assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
       });
     });
@@ -113,7 +120,9 @@ describe("Notifier - Unit", () => {
         body: '{"success": true}'
       });
 
-      const display = {displayId: 'ABC', displayName: 'Main Hall'};
+      const display = {
+        displayId: 'ABC', displayName: 'Main Hall', timeZoneOffset: -360
+      };
 
       return notifier.sendFailureEmail(display, ['a@example.com', 'b@example.com'])
       .then(() => {
@@ -139,6 +148,7 @@ describe("Notifier - Unit", () => {
         assert.equal(typeof options.body.text, "string");
         assert(options.body.text.indexOf("ABC") > 0);
         assert(options.body.text.indexOf("Main Hall") > 0);
+        assert(options.body.text.indexOf("Mar 14 2018, at 04:00AM") > 0);
       });
     });
 
@@ -174,6 +184,9 @@ describe("Notifier - Unit", () => {
         assert.equal(typeof options.body.text, "string");
         assert(options.body.text.indexOf("DEF") > 0);
         assert(options.body.text.indexOf("Corridor") > 0);
+
+        // No explicit offset, so UTC is reported here.
+        assert(options.body.text.indexOf("Mar 14 2018, at 10:00AM") > 0);
       });
     });
   });

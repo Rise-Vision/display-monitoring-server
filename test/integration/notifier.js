@@ -26,18 +26,21 @@ describe("Notifier - Integration", () => {
         displayId: 'ABC',
         displayName: 'Main Hall',
         online: true,
+        timeZoneOffset: -360,
         addresses: ['a@example.com']
       },
       {
         displayId: 'DEF',
         displayName: 'Corridor',
         online: false,
+        timeZoneOffset: -360,
         addresses: ['d@example.com']
       },
       {
         displayId: 'GHI',
         displayName: 'Back door',
         online: false,
+        timeZoneOffset: -360,
         addresses: ['g@example.com']
       }
     ])
@@ -76,18 +79,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -96,8 +102,9 @@ describe("Notifier - Integration", () => {
       assert(!notifier.sendRecoveryEmail.called);
 
       assert.equal(notifier.sendFailureEmail.callCount, 1);
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].timeZoneOffset, -360);
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
@@ -112,18 +119,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -146,18 +156,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -166,8 +179,9 @@ describe("Notifier - Integration", () => {
       assert(!notifier.sendRecoveryEmail.called);
 
       assert.equal(notifier.sendFailureEmail.callCount, 2);
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'GHI');
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Back door');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayId, 'GHI');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Back door');
+      assert.equal(notifier.sendFailureEmail.lastCall.args[0].timeZoneOffset, -360);
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['g@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
@@ -182,18 +196,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -214,18 +231,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -246,18 +266,21 @@ describe("Notifier - Integration", () => {
           displayId: 'ABC',
           displayName: 'Main Hall',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['a@example.com']
         },
         {
           displayId: 'DEF',
           displayName: 'Corridor',
           online: false,
+          timeZoneOffset: -360,
           addresses: ['d@example.com']
         },
         {
           displayId: 'GHI',
           displayName: 'Back door',
           online: true,
+          timeZoneOffset: -360,
           addresses: ['g@example.com']
         }
       ]);
@@ -266,8 +289,9 @@ describe("Notifier - Integration", () => {
       assert.equal(notifier.sendFailureEmail.callCount, 2);
 
       assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
+      assert.equal(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+      assert.equal(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
+      assert.equal(notifier.sendRecoveryEmail.lastCall.args[0].timeZoneOffset, -360);
       assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
