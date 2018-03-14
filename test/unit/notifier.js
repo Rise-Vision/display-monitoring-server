@@ -89,7 +89,7 @@ describe("Notifier - Unit", () => {
 
       const parameters = querystring.parse(parameterString);
 
-      assert.equal(parameters.from, "support@risevision.com");
+      assert.equal(parameters.from, "monitor@risevision.com");
       assert.equal(parameters.fromName, "Rise Vision Support");
       assert.equal(parameters.recipients, 'b@example.com');
       assert.equal(parameters.subject, "Display monitoring for display ABC");
@@ -121,7 +121,7 @@ describe("Notifier - Unit", () => {
 
       const parameters = querystring.parse(parameterString);
 
-      assert.equal(parameters.from, "support@risevision.com");
+      assert.equal(parameters.from, "monitor@risevision.com");
       assert.equal(parameters.fromName, "Rise Vision Support");
       assert.equal(parameters.recipients, 'd@example.com');
       assert.equal(parameters.subject, "Display monitoring for display DEF");

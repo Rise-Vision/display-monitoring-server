@@ -6,7 +6,7 @@ const querystring = require("querystring");
 const stateManager = require("./state-manager");
 
 const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
-const SENDER_ADDRESS = "support@risevision.com";
+const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
 const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
