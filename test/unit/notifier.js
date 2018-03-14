@@ -10,143 +10,169 @@ const stateManager = require("../../src/state-manager.js");
 
 describe("Notifier - Unit", () => {
 
-  beforeEach(() => {
-    simple.mock(stateManager, "filterUnmonitoredDisplays").returnWith();
-  });
+  describe("Dates", () => {
+    it("should get the display date with server date GMT-0400 and display date GMT-0600", () => {
+      const display = {timeZoneOffset: -360};
+      const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT-0400'));
 
-  afterEach(() => simple.restore());
+      const displayDate = notifier.displayDateFor(display, serverDate);
 
-  it("exists", ()=>{
-    assert(notifier);
-  });
+      assert.equal(displayDate.getDate(), 14);
+      assert.equal(displayDate.getHours(), 8);
+      assert.equal(displayDate.getMinutes(), 0);
+    });
 
-  it("should call email functions depending on state manager individual results", () => {
-    simple.mock(stateManager, "updateDisplayStatus").callFn(displayId => {
-      switch (displayId) {
-        case 'ABC': return null;
-        case 'DEF': return "SEND_FAILURE_EMAIL";
-        case 'GHI': return "SEND_RECOVERY_EMAIL";
-        default: assert.fail(displayId);
-      }
-    })
+    it("should get the display date with server date GMT and display date GMT-0600", () => {
+      const display = {timeZoneOffset: -360};
+      const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
 
-    simple.mock(notifier, "sendFailureEmail").returnWith();
-    simple.mock(notifier, "sendRecoveryEmail").returnWith();
+      const displayDate = notifier.displayDateFor(display, serverDate);
 
-    return notifier.updateDisplayStatusListAndNotify([
-      {
-        displayId: 'ABC',
-        displayName: 'Main Hall',
-        online: true,
-        addresses: ['a@example.com']
-      },
-      {
-        displayId: 'DEF',
-        displayName: 'Corridor',
-        online: false,
-        addresses: ['d@example.com']
-      },
-      {
-        displayId: 'GHI',
-        displayName: 'Back door',
-        online: true,
-        addresses: ['g@example.com']
-      }
-    ])
-    .then(() => {
-      assert(stateManager.updateDisplayStatus.called);
-      assert.equal(stateManager.updateDisplayStatus.callCount, 3);
-      const calls = stateManager.updateDisplayStatus.calls;
-
-      assert.deepEqual(calls[0].args, ['ABC', true]);
-      assert.deepEqual(calls[1].args, ['DEF', false]);
-      assert.deepEqual(calls[2].args, ['GHI', true]);
-
-      assert(!calls[0].returned);
-      assert.equal(calls[1].returned, "SEND_FAILURE_EMAIL");
-      assert.equal(calls[2].returned, "SEND_RECOVERY_EMAIL");
-
-      assert(notifier.sendFailureEmail.called);
-      assert.equal(notifier.sendFailureEmail.callCount, 1);
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
-
-      assert(notifier.sendRecoveryEmail.called);
-      assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
+      assert.equal(displayDate.getDate(), 14);
+      assert.equal(displayDate.getHours(), 4);
+      assert.equal(displayDate.getMinutes(), 0);
     });
   });
 
-  it("should invoke external API to send failure email", () => {
-    simple.mock(got, "post").resolveWith({
-      statusCode: 200,
-      body: '{"success": true}'
+  describe("Email functions", () => {
+    beforeEach(() => {
+      simple.mock(stateManager, "filterUnmonitoredDisplays").returnWith();
     });
 
-    const display = {displayId: 'ABC', displayName: 'Main Hall'};
+    afterEach(() => simple.restore());
 
-    return notifier.sendFailureEmail(display, ['a@example.com', 'b@example.com'])
-    .then(() => {
-      assert(got.post.called);
-      assert.equal(got.post.callCount, 2);
-
-      const [url, options] = got.post.lastCall.args;
-
-      const [resource, parameterString] = url.split('?');
-      assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
-
-      const parameters = querystring.parse(parameterString);
-
-      assert.equal(parameters.from, "monitor@risevision.com");
-      assert.equal(parameters.fromName, "Rise Vision Support");
-      assert.equal(parameters.recipients, 'b@example.com');
-      assert.equal(parameters.subject, "Display monitoring for display ABC");
-      assert(!parameters.text);
-
-      assert.equal(typeof options, "object");
-      assert(options.json);
-      assert(options.body);
-      assert.equal(typeof options.body.text, "string");
-      assert(options.body.text.indexOf("ABC") > 0);
-      assert(options.body.text.indexOf("Main Hall") > 0);
-    });
-  });
-
-  it("should invoke external API to send recovery email", () => {
-    simple.mock(got, "post").resolveWith({
-      statusCode: 200,
-      body: '{"success": true}'
+    it("exists", ()=>{
+      assert(notifier);
     });
 
-    const display = {displayId: 'DEF', displayName: 'Corridor'};
+    it("should call email functions depending on state manager individual results", () => {
+      simple.mock(stateManager, "updateDisplayStatus").callFn(displayId => {
+        switch (displayId) {
+          case 'ABC': return null;
+          case 'DEF': return "SEND_FAILURE_EMAIL";
+          case 'GHI': return "SEND_RECOVERY_EMAIL";
+          default: assert.fail(displayId);
+        }
+      })
 
-    return notifier.sendRecoveryEmail(display, ['d@example.com'])
-    .then(() => {
-      assert(got.post.called);
-      assert.equal(got.post.callCount, 1);
+      simple.mock(notifier, "sendFailureEmail").returnWith();
+      simple.mock(notifier, "sendRecoveryEmail").returnWith();
 
-      const [url, options] = got.post.lastCall.args;
+      return notifier.updateDisplayStatusListAndNotify([
+        {
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: true,
+          addresses: ['a@example.com']
+        },
+        {
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: false,
+          addresses: ['d@example.com']
+        },
+        {
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: true,
+          addresses: ['g@example.com']
+        }
+      ])
+      .then(() => {
+        assert(stateManager.updateDisplayStatus.called);
+        assert.equal(stateManager.updateDisplayStatus.callCount, 3);
+        const calls = stateManager.updateDisplayStatus.calls;
 
-      const [resource, parameterString] = url.split('?');
-      assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
+        assert.deepEqual(calls[0].args, ['ABC', true]);
+        assert.deepEqual(calls[1].args, ['DEF', false]);
+        assert.deepEqual(calls[2].args, ['GHI', true]);
 
-      const parameters = querystring.parse(parameterString);
+        assert(!calls[0].returned);
+        assert.equal(calls[1].returned, "SEND_FAILURE_EMAIL");
+        assert.equal(calls[2].returned, "SEND_RECOVERY_EMAIL");
 
-      assert.equal(parameters.from, "monitor@risevision.com");
-      assert.equal(parameters.fromName, "Rise Vision Support");
-      assert.equal(parameters.recipients, 'd@example.com');
-      assert.equal(parameters.subject, "Display monitoring for display DEF");
-      assert(!parameters.text);
+        assert(notifier.sendFailureEmail.called);
+        assert.equal(notifier.sendFailureEmail.callCount, 1);
+        assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+        assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
+        assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
-      assert.equal(typeof options, "object");
-      assert(options.json);
-      assert(options.body);
-      assert.equal(typeof options.body.text, "string");
-      assert(options.body.text.indexOf("DEF") > 0);
-      assert(options.body.text.indexOf("Corridor") > 0);
+        assert(notifier.sendRecoveryEmail.called);
+        assert.equal(notifier.sendRecoveryEmail.callCount, 1);
+        assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+        assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
+        assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
+      });
+    });
+
+    it("should invoke external API to send failure email", () => {
+      simple.mock(got, "post").resolveWith({
+        statusCode: 200,
+        body: '{"success": true}'
+      });
+
+      const display = {displayId: 'ABC', displayName: 'Main Hall'};
+
+      return notifier.sendFailureEmail(display, ['a@example.com', 'b@example.com'])
+      .then(() => {
+        assert(got.post.called);
+        assert.equal(got.post.callCount, 2);
+
+        const [url, options] = got.post.lastCall.args;
+
+        const [resource, parameterString] = url.split('?');
+        assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
+
+        const parameters = querystring.parse(parameterString);
+
+        assert.equal(parameters.from, "monitor@risevision.com");
+        assert.equal(parameters.fromName, "Rise Vision Support");
+        assert.equal(parameters.recipients, 'b@example.com');
+        assert.equal(parameters.subject, "Display monitoring for display ABC");
+        assert(!parameters.text);
+
+        assert.equal(typeof options, "object");
+        assert(options.json);
+        assert(options.body);
+        assert.equal(typeof options.body.text, "string");
+        assert(options.body.text.indexOf("ABC") > 0);
+        assert(options.body.text.indexOf("Main Hall") > 0);
+      });
+    });
+
+    it("should invoke external API to send recovery email", () => {
+      simple.mock(got, "post").resolveWith({
+        statusCode: 200,
+        body: '{"success": true}'
+      });
+
+      const display = {displayId: 'DEF', displayName: 'Corridor'};
+
+      return notifier.sendRecoveryEmail(display, ['d@example.com'])
+      .then(() => {
+        assert(got.post.called);
+        assert.equal(got.post.callCount, 1);
+
+        const [url, options] = got.post.lastCall.args;
+
+        const [resource, parameterString] = url.split('?');
+        assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
+
+        const parameters = querystring.parse(parameterString);
+
+        assert.equal(parameters.from, "monitor@risevision.com");
+        assert.equal(parameters.fromName, "Rise Vision Support");
+        assert.equal(parameters.recipients, 'd@example.com');
+        assert.equal(parameters.subject, "Display monitoring for display DEF");
+        assert(!parameters.text);
+
+        assert.equal(typeof options, "object");
+        assert(options.json);
+        assert(options.body);
+        assert.equal(typeof options.body.text, "string");
+        assert(options.body.text.indexOf("DEF") > 0);
+        assert(options.body.text.indexOf("Corridor") > 0);
+      });
     });
   });
 

@@ -6,7 +6,9 @@ if (recipients.length === 0) {
   throw new Error("No recipient addresses provided");
 }
 
-const display = {displayId: 'ABC', displayName: 'Main Hall'}
+const display = {
+  displayId: 'ABC', displayName: 'Main Hall', timeZoneOffset: -360
+};
 
 notifier.sendFailureEmail(display, recipients)
 .then(console.log)

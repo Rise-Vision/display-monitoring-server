@@ -1,3 +1,4 @@
+const dateFormat = require("dateformat");
 const logger = require("./logger");
 const fs = require("fs");
 const got = require("got");
@@ -10,6 +11,7 @@ const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
 const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
+const ONE_MINUTE = 60000;
 
 const templates = {
   "failure": loadTemplate("monitor-offline-email"),
@@ -56,14 +58,29 @@ function sendRecoveryEmail(display, addresses) {
   return prepareAndSendEmail(templates.recovery, display, addresses);
 }
 
-function replace(text, display) {
+function displayDateFor(display, serverDate = new Date()) {
+  const offset = display.timeZoneOffset || 0;
+
+  const serverOffset = serverDate.getTimezoneOffset() * ONE_MINUTE
+  const utc = new Date(serverDate.getTime() + serverOffset);
+
+  const displayOffset = offset * ONE_MINUTE;
+  return new Date(utc.getTime() + displayOffset);
+}
+
+function replace(text, display, displayDate) {
+  const formattedTimestamp =
+    dateFormat(displayDate, 'mmm dd yyyy, "at" HH:MMTT');
+
   return text.replace(/DISPLAYID/g, display.displayId)
   .replace(/DISPLAYNAME/g, display.displayName)
+  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
 }
 
 function prepareAndSendEmail(template, display, recipients) {
-  const subject = replace(SUBJECT_LINE, display);
-  const text = replace(template, display);
+  const displayDate = displayDateFor(display);
+  const subject = replace(SUBJECT_LINE, display, displayDate);
+  const text = replace(template, display, displayDate);
 
   const promises = recipients.map(recipient=>{
     const data = {
@@ -114,6 +131,7 @@ function logErrorDataFor(response, url) {
 }
 
 module.exports = {
+  displayDateFor,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify
