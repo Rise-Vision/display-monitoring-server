@@ -24,10 +24,14 @@ describe("QueryRunner - Unit", () => {
       const data = [[
         {
           displayId: 'ABC',
+          displayName: 'Main display',
+          timeZoneOffset: -360,
           monitoringEmails: 'a@example.com, a2@example.com'
         },
         {
           displayId: 'DEF',
+          displayName: 'Secondary display',
+          timeZoneOffset: -360,
           monitoringEmails: 'd@example.com'
         }
       ]];
@@ -35,8 +39,18 @@ describe("QueryRunner - Unit", () => {
       const list = runner.asDisplayList(data);
 
       assert.deepEqual(list, [
-        {displayId: "ABC", addresses: ["a@example.com", "a2@example.com"]},
-        {displayId: "DEF", addresses: ["d@example.com"]}
+        {
+          displayId: "ABC",
+          displayName: 'Main display',
+          timeZoneOffset: -360,
+          addresses: ["a@example.com", "a2@example.com"]
+        },
+        {
+          displayId: "DEF",
+          displayName: 'Secondary display',
+          timeZoneOffset: -360,
+          addresses: ["d@example.com"]
+        }
       ]);
     });
 
@@ -54,10 +68,14 @@ describe("QueryRunner - Unit", () => {
       const data = [[
         {
           displayId: 'ABC',
+          displayName: 'Main display',
+          timeZoneOffset: -360,
           monitoringEmails: 'a@example.com, a2@example.com'
         },
         {
           displayId: 'DEF',
+          displayName: 'Secondary display',
+          timeZoneOffset: -360,
           monitoringEmails: 'd@example.com'
         }
       ]];
@@ -67,8 +85,18 @@ describe("QueryRunner - Unit", () => {
       })
       .then(list => {
         assert.deepEqual(list, [
-          {displayId: "ABC", addresses: ["a@example.com", "a2@example.com"]},
-          {displayId: "DEF", addresses: ["d@example.com"]}
+          {
+            displayId: "ABC",
+            displayName: 'Main display',
+            timeZoneOffset: -360,
+            addresses: ["a@example.com", "a2@example.com"]
+          },
+          {
+            displayId: "DEF",
+            displayName: 'Secondary display',
+            timeZoneOffset: -360,
+            addresses: ["d@example.com"]
+          }
         ]);
       });
     });
