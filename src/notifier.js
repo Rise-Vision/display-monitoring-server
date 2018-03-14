@@ -58,7 +58,12 @@ function sendRecoveryEmail(display, addresses) {
   return prepareAndSendEmail(templates.recovery, display, addresses);
 }
 
-function displayDateFor(display, serverDate = new Date()) {
+function getServerDate() {
+  return new Date();
+}
+
+function displayDateFor(display) {
+  const serverDate = module.exports.getServerDate();
   const offset = display.timeZoneOffset || 0;
 
   const serverOffset = serverDate.getTimezoneOffset() * ONE_MINUTE
@@ -132,6 +137,7 @@ function logErrorDataFor(response, url) {
 
 module.exports = {
   displayDateFor,
+  getServerDate,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify

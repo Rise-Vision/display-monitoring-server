@@ -10,12 +10,15 @@ const stateManager = require("../../src/state-manager.js");
 
 describe("Notifier - Unit", () => {
 
+  afterEach(() => simple.restore());
+
   describe("Dates", () => {
     it("should get the display date with server date GMT-0400 and display date GMT-0600", () => {
-      const display = {timeZoneOffset: -360};
       const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT-0400'));
+      simple.mock(notifier, "getServerDate").returnWith(serverDate);
 
-      const displayDate = notifier.displayDateFor(display, serverDate);
+      const display = {timeZoneOffset: -360};
+      const displayDate = notifier.displayDateFor(display);
 
       assert.equal(displayDate.getDate(), 14);
       assert.equal(displayDate.getHours(), 8);
@@ -23,10 +26,11 @@ describe("Notifier - Unit", () => {
     });
 
     it("should get the display date with server date GMT and display date GMT-0600", () => {
-      const display = {timeZoneOffset: -360};
       const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
+      simple.mock(notifier, "getServerDate").returnWith(serverDate);
 
-      const displayDate = notifier.displayDateFor(display, serverDate);
+      const display = {timeZoneOffset: -360};
+      const displayDate = notifier.displayDateFor(display);
 
       assert.equal(displayDate.getDate(), 14);
       assert.equal(displayDate.getHours(), 4);
@@ -38,8 +42,6 @@ describe("Notifier - Unit", () => {
     beforeEach(() => {
       simple.mock(stateManager, "filterUnmonitoredDisplays").returnWith();
     });
-
-    afterEach(() => simple.restore());
 
     it("exists", ()=>{
       assert(notifier);
