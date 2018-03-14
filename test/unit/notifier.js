@@ -35,13 +35,22 @@ describe("Notifier - Unit", () => {
 
     return notifier.updateDisplayStatusListAndNotify([
       {
-        displayId: 'ABC', online: true, addresses: ['a@example.com']
+        displayId: 'ABC',
+        displayName: 'Main Hall',
+        online: true,
+        addresses: ['a@example.com']
       },
       {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
+        displayId: 'DEF',
+        displayName: 'Corridor',
+        online: false,
+        addresses: ['d@example.com']
       },
       {
-        displayId: 'GHI', online: true, addresses: ['g@example.com']
+        displayId: 'GHI',
+        displayName: 'Back door',
+        online: true,
+        addresses: ['g@example.com']
       }
     ])
     .then(() => {
@@ -60,11 +69,13 @@ describe("Notifier - Unit", () => {
       assert(notifier.sendFailureEmail.called);
       assert.equal(notifier.sendFailureEmail.callCount, 1);
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
       assert(notifier.sendRecoveryEmail.called);
       assert.equal(notifier.sendRecoveryEmail.callCount, 1);
       assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
       assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
     });
   });
@@ -75,7 +86,7 @@ describe("Notifier - Unit", () => {
       body: '{"success": true}'
     });
 
-    const display = {displayId: 'ABC'};
+    const display = {displayId: 'ABC', displayName: 'Main Hall'};
 
     return notifier.sendFailureEmail(display, ['a@example.com', 'b@example.com'])
     .then(() => {
@@ -100,6 +111,7 @@ describe("Notifier - Unit", () => {
       assert(options.body);
       assert.equal(typeof options.body.text, "string");
       assert(options.body.text.indexOf("ABC") > 0);
+      assert(options.body.text.indexOf("Main Hall") > 0);
     });
   });
 
@@ -109,7 +121,7 @@ describe("Notifier - Unit", () => {
       body: '{"success": true}'
     });
 
-    const display = {displayId: 'DEF'};
+    const display = {displayId: 'DEF', displayName: 'Corridor'};
 
     return notifier.sendRecoveryEmail(display, ['d@example.com'])
     .then(() => {
@@ -134,6 +146,7 @@ describe("Notifier - Unit", () => {
       assert(options.body);
       assert.equal(typeof options.body.text, "string");
       assert(options.body.text.indexOf("DEF") > 0);
+      assert(options.body.text.indexOf("Corridor") > 0);
     });
   });
 

@@ -23,13 +23,22 @@ describe("Notifier - Integration", () => {
     // first iteration, one display online, two offline
     return notifier.updateDisplayStatusListAndNotify([
       {
-        displayId: 'ABC', online: true, addresses: ['a@example.com']
+        displayId: 'ABC',
+        displayName: 'Main Hall',
+        online: true,
+        addresses: ['a@example.com']
       },
       {
-        displayId: 'DEF', online: false, addresses: ['d@example.com']
+        displayId: 'DEF',
+        displayName: 'Corridor',
+        online: false,
+        addresses: ['d@example.com']
       },
       {
-        displayId: 'GHI', online: false, addresses: ['g@example.com']
+        displayId: 'GHI',
+        displayName: 'Back door',
+        online: false,
+        addresses: ['g@example.com']
       }
     ])
     .then(() => {
@@ -64,13 +73,22 @@ describe("Notifier - Integration", () => {
       // ABC continues offline, DEF two periods offline now, GHI back and offline
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: false, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: false,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: false, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: false,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: false, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: false,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -79,6 +97,7 @@ describe("Notifier - Integration", () => {
 
       assert.equal(notifier.sendFailureEmail.callCount, 1);
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Corridor');
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
@@ -90,13 +109,22 @@ describe("Notifier - Integration", () => {
       // ABC goes online, DEF still offline, GHI still offline
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: true, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: true,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: false, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: false,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: false, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: false,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -115,13 +143,22 @@ describe("Notifier - Integration", () => {
       // ABC still online, DEF goes online, GHI offline for two periods now
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: true, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: true,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: true, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: true,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: false, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: false,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -130,6 +167,7 @@ describe("Notifier - Integration", () => {
 
       assert.equal(notifier.sendFailureEmail.callCount, 2);
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'GHI');
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayName, 'Back door');
       assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['g@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
@@ -141,13 +179,22 @@ describe("Notifier - Integration", () => {
       // ABC goes offline, DEF still online, GHI goes online again
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: false, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: false,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: true, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: true,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: true, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: true,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -164,13 +211,22 @@ describe("Notifier - Integration", () => {
       // ABC still offline, DEF goes back offline, GHI still online
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: false, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: false,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: false, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: false,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: true, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: true,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -187,13 +243,22 @@ describe("Notifier - Integration", () => {
       // ABC back online, DEF still offline, GHI two periods now in online recovering
       return notifier.updateDisplayStatusListAndNotify([
         {
-          displayId: 'ABC', online: true, addresses: ['a@example.com']
+          displayId: 'ABC',
+          displayName: 'Main Hall',
+          online: true,
+          addresses: ['a@example.com']
         },
         {
-          displayId: 'DEF', online: false, addresses: ['d@example.com']
+          displayId: 'DEF',
+          displayName: 'Corridor',
+          online: false,
+          addresses: ['d@example.com']
         },
         {
-          displayId: 'GHI', online: true, addresses: ['g@example.com']
+          displayId: 'GHI',
+          displayName: 'Back door',
+          online: true,
+          addresses: ['g@example.com']
         }
       ]);
     })
@@ -202,6 +267,7 @@ describe("Notifier - Integration", () => {
 
       assert.equal(notifier.sendRecoveryEmail.callCount, 1);
       assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayName, 'Back door');
       assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
 
       assert.deepEqual(stateManager.getCurrentDisplayStates(), {
