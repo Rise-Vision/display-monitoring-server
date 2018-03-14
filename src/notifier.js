@@ -73,7 +73,7 @@ function displayDateFor(display) {
   return new Date(utc.getTime() + displayOffset);
 }
 
-function replace(text, display, displayDate) {
+function replaceDisplayData(text, display, displayDate) {
   const formattedTimestamp =
     dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
 
@@ -84,8 +84,8 @@ function replace(text, display, displayDate) {
 
 function prepareAndSendEmail(template, display, recipients) {
   const displayDate = displayDateFor(display);
-  const subject = replace(SUBJECT_LINE, display, displayDate);
-  const text = replace(template, display, displayDate);
+  const subject = replaceDisplayData(SUBJECT_LINE, display, displayDate);
+  const text = replaceDisplayData(template, display, displayDate);
 
   const promises = recipients.map(recipient=>{
     const data = {
@@ -138,6 +138,7 @@ function logErrorDataFor(response, url) {
 module.exports = {
   displayDateFor,
   getServerDate,
+  replaceDisplayData,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify

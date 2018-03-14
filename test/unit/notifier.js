@@ -38,6 +38,33 @@ describe("Notifier - Unit", () => {
     });
   });
 
+  describe("Templates", () => {
+    it("should replace display data", () => {
+      const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
+      simple.mock(notifier, "getServerDate").returnWith(serverDate);
+
+      const display = {
+        displayId: 'ABC', displayName: 'Main Hall', timeZoneOffset: -240
+      };
+
+      const template = `
+        Display id: DISPLAYID,
+        name: DISPLAYNAME,
+        timestamp: FORMATTEDTIMESTAMP
+      `;
+
+      const displayDate = notifier.displayDateFor(display);
+      const formatted =
+        notifier.replaceDisplayData(template, display, displayDate);
+
+      assert.equal(formatted, `
+        Display id: ABC,
+        name: Main Hall,
+        timestamp: Mar 14 2018, at 06:00AM
+      `);
+    });
+  });
+
   describe("Email functions", () => {
     beforeEach(() => {
       const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
