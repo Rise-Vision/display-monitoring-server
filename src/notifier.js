@@ -35,11 +35,11 @@ function updateDisplayStatusListAndNotify(list) {
       switch (action) {
         case "SEND_FAILURE_EMAIL":
           logger.log(`Sending failure email to ${addresses} for ${displayId}`);
-          return module.exports.sendFailureEmail(displayId, addresses);
+          return module.exports.sendFailureEmail(display, addresses);
 
         case "SEND_RECOVERY_EMAIL":
           logger.log(`Sending recovery email to ${addresses} for ${displayId}`);
-          return module.exports.sendRecoveryEmail(displayId, addresses);
+          return module.exports.sendRecoveryEmail(display, addresses);
 
         default:
       }
@@ -48,20 +48,24 @@ function updateDisplayStatusListAndNotify(list) {
   }, Promise.resolve());
 }
 
-function sendFailureEmail(displayId, addresses) {
-  return prepareAndSendEmail(templates.failure, displayId, addresses);
+function sendFailureEmail(display, addresses) {
+  return prepareAndSendEmail(templates.failure, display, addresses);
 }
 
-function sendRecoveryEmail(displayId, addresses) {
-  return prepareAndSendEmail(templates.recovery, displayId, addresses);
+function sendRecoveryEmail(display, addresses) {
+  return prepareAndSendEmail(templates.recovery, display, addresses);
 }
 
-function prepareAndSendEmail(template, displayId, recipients) {
-  const subject = SUBJECT_LINE.replace('DISPLAYID', displayId);
-  const text = template.replace(/DISPLAYID/g, displayId);
-  const promises = [];
+function replace(text, display) {
+  return text.replace(/DISPLAYID/g, display.displayId)
+  .replace(/DISPLAYNAME/g, display.displayName)
+}
 
-  recipients.forEach(recipient=>{
+function prepareAndSendEmail(template, display, recipients) {
+  const subject = replace(SUBJECT_LINE, display);
+  const text = replace(template, display);
+
+  const promises = recipients.map(recipient=>{
     const data = {
       from: SENDER_ADDRESS,
       fromName: SENDER_NAME,
@@ -76,7 +80,7 @@ function prepareAndSendEmail(template, displayId, recipients) {
       }
     };
 
-    promises.push(send(data, options));
+    return send(data, options);
   });
 
   return Promise.all(promises)

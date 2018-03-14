@@ -59,15 +59,13 @@ describe("Notifier - Unit", () => {
 
       assert(notifier.sendFailureEmail.called);
       assert.equal(notifier.sendFailureEmail.callCount, 1);
-      assert.deepEqual(notifier.sendFailureEmail.lastCall.args, [
-        'DEF', ['d@example.com']
-      ]);
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[0].displayId, 'DEF');
+      assert.deepEqual(notifier.sendFailureEmail.lastCall.args[1], ['d@example.com']);
 
       assert(notifier.sendRecoveryEmail.called);
       assert.equal(notifier.sendRecoveryEmail.callCount, 1);
-      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args, [
-        'GHI', ['g@example.com']
-      ]);
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[0].displayId, 'GHI');
+      assert.deepEqual(notifier.sendRecoveryEmail.lastCall.args[1], ['g@example.com']);
     });
   });
 
@@ -77,7 +75,9 @@ describe("Notifier - Unit", () => {
       body: '{"success": true}'
     });
 
-    return notifier.sendFailureEmail('ABC', ['a@example.com', 'b@example.com'])
+    const display = {displayId: 'ABC'};
+
+    return notifier.sendFailureEmail(display, ['a@example.com', 'b@example.com'])
     .then(() => {
       assert(got.post.called);
       assert.equal(got.post.callCount, 2);
@@ -109,7 +109,9 @@ describe("Notifier - Unit", () => {
       body: '{"success": true}'
     });
 
-    return notifier.sendRecoveryEmail('DEF', ['d@example.com'])
+    const display = {displayId: 'DEF'};
+
+    return notifier.sendRecoveryEmail(display, ['d@example.com'])
     .then(() => {
       assert(got.post.called);
       assert.equal(got.post.callCount, 1);
