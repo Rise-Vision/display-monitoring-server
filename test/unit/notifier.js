@@ -82,7 +82,7 @@ describe("Notifier - Unit", () => {
       assert(got.post.called);
       assert.equal(got.post.callCount, 2);
 
-      const url = got.post.lastCall.args[0];
+      const [url, options] = got.post.lastCall.args;
 
       const [resource, parameterString] = url.split('?');
       assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
@@ -93,8 +93,13 @@ describe("Notifier - Unit", () => {
       assert.equal(parameters.fromName, "Rise Vision Support");
       assert.equal(parameters.recipients, 'b@example.com');
       assert.equal(parameters.subject, "Display monitoring for display ABC");
-      assert.equal(typeof parameters.text, "string");
-      assert(parameters.text.indexOf("ABC") > 0);
+      assert(!parameters.text);
+
+      assert.equal(typeof options, "object");
+      assert(options.json);
+      assert(options.body);
+      assert.equal(typeof options.body.text, "string");
+      assert(options.body.text.indexOf("ABC") > 0);
     });
   });
 
@@ -109,7 +114,7 @@ describe("Notifier - Unit", () => {
       assert(got.post.called);
       assert.equal(got.post.callCount, 1);
 
-      const url = got.post.lastCall.args[0];
+      const [url, options] = got.post.lastCall.args;
 
       const [resource, parameterString] = url.split('?');
       assert.equal(resource, "https://rvaserver2.appspot.com/_ah/api/rise/v0/email");
@@ -120,8 +125,13 @@ describe("Notifier - Unit", () => {
       assert.equal(parameters.fromName, "Rise Vision Support");
       assert.equal(parameters.recipients, 'd@example.com');
       assert.equal(parameters.subject, "Display monitoring for display DEF");
-      assert.equal(typeof parameters.text, "string");
-      assert(parameters.text.indexOf("DEF") > 0);
+      assert(!parameters.text);
+
+      assert.equal(typeof options, "object");
+      assert(options.json);
+      assert(options.body);
+      assert.equal(typeof options.body.text, "string");
+      assert(options.body.text.indexOf("DEF") > 0);
     });
   });
 

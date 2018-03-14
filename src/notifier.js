@@ -11,12 +11,12 @@ const RESPONSE_OK = 200;
 const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
 
 const templates = {
-  "failure": loadTemplate("failure"),
-  "recovery": loadTemplate("recovery")
+  "failure": loadTemplate("monitor-offline-email"),
+  "recovery": loadTemplate("monitor-online-email")
 };
 
 function loadTemplate(name) {
-  const path = require.resolve(`./templates/${name}.txt`);
+  const path = require.resolve(`./templates/${name}.html`);
 
   return fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
 }
@@ -65,28 +65,34 @@ function prepareAndSendEmail(template, displayId, recipients) {
       from: SENDER_ADDRESS,
       fromName: SENDER_NAME,
       recipients: recipient,
-      subject,
-      text: text.replace("EMAIL", recipient)
+      subject
     };
 
-    promises.push(send(data));
+    const options = {
+      json: true,
+      body: {
+        text: text.replace("EMAIL", recipient)
+      }
+    };
+
+    promises.push(send(data, options));
   });
 
   return Promise.all(promises)
   .then(() => console.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
 }
 
-function send(data) {
+function send(data, options) {
   const parameterString = querystring.stringify(data);
   const url = `${EMAIL_API_URL}?${parameterString}`;
 
-  return got.post(url)
+  return got.post(url, options)
   .then(response => {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }
 
-    return JSON.parse(response.body);
+    return response.body;
   });
 }
 

@@ -1,3 +1,0 @@
-The display with display id 'DISPLAYID' has gone offline.
-
-If you no longer wish to receive these notices, you can <a href="https://rvaserver2.appspot.com/monitoring/unsubscribe?email=EMAIL&id=DISPLAYID>unsubscribe</a>.
