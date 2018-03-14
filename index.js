@@ -1,9 +1,13 @@
+const logger = require("./src/logger");
 const notifier = require("./src/notifier");
 const runner = require("./src/query-runner");
 const stateRetriever = require("./src/connection-state-retriever");
 
 const MINUTES = 60000;
 const monitoringInterval = 5 * MINUTES; // eslint-disable-line no-magic-numbers
+
+process.on("SIGUSR2", logger.debugToggle);
+Error.stackTraceLimit = 50;
 
 let timerId = null;
 
@@ -22,14 +26,14 @@ function monitorDisplays() {
       return console.warn("No monitored displays found");
     }
 
-    console.log(`Checking ${displays.length} displays`);
+    logger.log(`Checking ${displays.length} displays`);
     const displayIds = displays.map(display => display.displayId);
 
     return stateRetriever.retrieveState(displayIds)
     .then(states => {
-      console.log(`States retrieved: ${JSON.stringify(states)}`);
+      logger.log(`States retrieved: ${JSON.stringify(states)}`);
       const statusList = generateStatusList(displays, states);
-      console.log(`Status list generated: ${JSON.stringify(statusList)}`);
+      logger.log(`Status list generated: ${JSON.stringify(statusList)}`);
 
       return notifier.updateDisplayStatusListAndNotify(statusList);
     });
