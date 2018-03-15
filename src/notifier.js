@@ -1,28 +1,15 @@
-const dateFormat = require("dateformat");
 const logger = require("./logger");
-const fs = require("fs");
 const got = require("got");
 const querystring = require("querystring");
 
 const stateManager = require("./state-manager");
+const templates = require("./templates");
 
 const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "support@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
-const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
 const ONE_MINUTE = 60000;
-
-const templates = {
-  "failure": loadTemplate("monitor-offline-email"),
-  "recovery": loadTemplate("monitor-online-email")
-};
-
-function loadTemplate(name) {
-  const path = require.resolve(`./templates/${name}.html`);
-
-  return fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
-}
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
@@ -73,19 +60,10 @@ function displayDateFor(display) {
   return new Date(utc.getTime() + displayOffset);
 }
 
-function replaceDisplayData(text, display, displayDate) {
-  const formattedTimestamp =
-    dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
-
-  return text.replace(/DISPLAYID/g, display.displayId)
-  .replace(/DISPLAYNAME/g, display.displayName)
-  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
-}
-
 function prepareAndSendEmail(template, display, recipients) {
   const displayDate = displayDateFor(display);
-  const subject = replaceDisplayData(SUBJECT_LINE, display, displayDate);
-  const text = replaceDisplayData(template, display, displayDate);
+  const subject = template.subjectForDisplay(display, displayDate);
+  const text = template.textForDisplay(display, displayDate);
 
   const promises = recipients.map(recipient=>{
     const data = {
@@ -138,7 +116,6 @@ function logErrorDataFor(response, url) {
 module.exports = {
   displayDateFor,
   getServerDate,
-  replaceDisplayData,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify

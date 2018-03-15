@@ -38,33 +38,6 @@ describe("Notifier - Unit", () => {
     });
   });
 
-  describe("Templates", () => {
-    it("should replace display data", () => {
-      const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
-      simple.mock(notifier, "getServerDate").returnWith(serverDate);
-
-      const display = {
-        displayId: 'ABC', displayName: 'Main Hall', timeZoneOffset: -240
-      };
-
-      const template = `
-        Display id: DISPLAYID,
-        name: DISPLAYNAME,
-        timestamp: FORMATTEDTIMESTAMP
-      `;
-
-      const displayDate = notifier.displayDateFor(display);
-      const formatted =
-        notifier.replaceDisplayData(template, display, displayDate);
-
-      assert.equal(formatted, `
-        Display id: ABC,
-        name: Main Hall,
-        timestamp: Mar 14 2018, at 06:00AM
-      `);
-    });
-  });
-
   describe("Email functions", () => {
     beforeEach(() => {
       const serverDate = new Date(Date.parse('14 Mar 2018 10:00:00 GMT'));
@@ -166,7 +139,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "support@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'b@example.com');
-        assert.equal(parameters.subject, "Display monitoring for display ABC");
+        assert.equal(parameters.subject, "Main Hall disconnected at 04:00AM and is now offline");
         assert(!parameters.text);
 
         assert.equal(typeof options, "object");
@@ -202,7 +175,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "support@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'd@example.com');
-        assert.equal(parameters.subject, "Display monitoring for display DEF");
+        assert.equal(parameters.subject, "Corridor reconnected at 10:00AM and is now online");
         assert(!parameters.text);
 
         assert.equal(typeof options, "object");
