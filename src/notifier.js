@@ -74,7 +74,7 @@ function replaceDisplayData(text, display, displayDate) {
 function prepareAndSendEmail(template, display, recipients) {
   const displayDate = displayDateFor(display);
   const subject = replaceDisplayData(SUBJECT_LINE, display, displayDate);
-  const text = replaceDisplayData(template, display, displayDate);
+  const text = template.textForDisplay(display, displayDate);
 
   const promises = recipients.map(recipient=>{
     const data = {
