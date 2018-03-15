@@ -1,8 +1,6 @@
 const dateFormat = require("dateformat");
 const fs = require("fs");
 
-const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
-
 function loadFromFile(name) {
   const path = require.resolve(`./${name}.html`);
 
@@ -22,7 +20,7 @@ function Template(options) {
   this.body = loadFromFile(options.body);
 
   this.subjectForDisplay = function(display, displayDate) {
-    return replaceDisplayData(SUBJECT_LINE, display, displayDate);
+    return replaceDisplayData(options.subject, display, displayDate);
   }
 
   this.textForDisplay = function(display, displayDate) {
@@ -32,10 +30,12 @@ function Template(options) {
 
 module.exports = {
   failure: new Template({
-    body: "monitor-offline-email"
+    body: "monitor-offline-email",
+    subject: "DISPLAYNAME disconnected at FORMATTEDTIME and is now offline"
   }),
   recovery: new Template({
-    body: "monitor-online-email"
+    body: "monitor-online-email",
+    subject: "DISPLAYNAME reconnected at FORMATTEDTIME and is now online"
   }),
   replaceDisplayData
 };
