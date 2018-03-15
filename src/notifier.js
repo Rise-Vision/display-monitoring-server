@@ -101,7 +101,7 @@ function prepareAndSendEmail(template, display, recipients) {
         text: text.replace("EMAIL", recipient)
       }
     };
-console.log(JSON.stringify(options.body))
+
     return send(data, options);
   });
 
