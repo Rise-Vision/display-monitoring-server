@@ -1,3 +1,4 @@
+const dateFormat = require("dateformat");
 const logger = require("./logger");
 const fs = require("fs");
 const got = require("got");
@@ -10,14 +11,15 @@ const SENDER_ADDRESS = "support@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
 const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
+const ONE_MINUTE = 60000;
 
 const templates = {
-  "failure": loadTemplate("failure"),
-  "recovery": loadTemplate("recovery")
+  "failure": loadTemplate("monitor-offline-email"),
+  "recovery": loadTemplate("monitor-online-email")
 };
 
 function loadTemplate(name) {
-  const path = require.resolve(`./templates/${name}.txt`);
+  const path = require.resolve(`./templates/${name}.html`);
 
   return fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
 }
@@ -35,11 +37,11 @@ function updateDisplayStatusListAndNotify(list) {
       switch (action) {
         case "SEND_FAILURE_EMAIL":
           logger.log(`Sending failure email to ${addresses} for ${displayId}`);
-          return module.exports.sendFailureEmail(displayId, addresses);
+          return module.exports.sendFailureEmail(display, addresses);
 
         case "SEND_RECOVERY_EMAIL":
           logger.log(`Sending recovery email to ${addresses} for ${displayId}`);
-          return module.exports.sendRecoveryEmail(displayId, addresses);
+          return module.exports.sendRecoveryEmail(display, addresses);
 
         default:
       }
@@ -48,46 +50,76 @@ function updateDisplayStatusListAndNotify(list) {
   }, Promise.resolve());
 }
 
-function sendFailureEmail(displayId, addresses) {
-  return prepareAndSendEmail(templates.failure, displayId, addresses);
+function sendFailureEmail(display, addresses) {
+  return prepareAndSendEmail(templates.failure, display, addresses);
 }
 
-function sendRecoveryEmail(displayId, addresses) {
-  return prepareAndSendEmail(templates.recovery, displayId, addresses);
+function sendRecoveryEmail(display, addresses) {
+  return prepareAndSendEmail(templates.recovery, display, addresses);
 }
 
-function prepareAndSendEmail(template, displayId, recipients) {
-  const subject = SUBJECT_LINE.replace('DISPLAYID', displayId);
-  const text = template.replace(/DISPLAYID/g, displayId);
-  const promises = [];
+function getServerDate() {
+  return new Date();
+}
 
-  recipients.forEach(recipient=>{
+function displayDateFor(display) {
+  const serverDate = module.exports.getServerDate();
+  const offset = display.timeZoneOffset || 0;
+
+  const serverOffset = serverDate.getTimezoneOffset() * ONE_MINUTE
+  const utc = new Date(serverDate.getTime() + serverOffset);
+
+  const displayOffset = offset * ONE_MINUTE;
+  return new Date(utc.getTime() + displayOffset);
+}
+
+function replaceDisplayData(text, display, displayDate) {
+  const formattedTimestamp =
+    dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
+
+  return text.replace(/DISPLAYID/g, display.displayId)
+  .replace(/DISPLAYNAME/g, display.displayName)
+  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
+}
+
+function prepareAndSendEmail(template, display, recipients) {
+  const displayDate = displayDateFor(display);
+  const subject = replaceDisplayData(SUBJECT_LINE, display, displayDate);
+  const text = replaceDisplayData(template, display, displayDate);
+
+  const promises = recipients.map(recipient=>{
     const data = {
       from: SENDER_ADDRESS,
       fromName: SENDER_NAME,
       recipients: recipient,
-      subject,
-      text: text.replace("EMAIL", recipient)
+      subject
     };
 
-    promises.push(send(data));
+    const options = {
+      json: true,
+      body: {
+        text: text.replace("EMAIL", recipient)
+      }
+    };
+
+    return send(data, options);
   });
 
   return Promise.all(promises)
   .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
 }
 
-function send(data) {
+function send(data, options) {
   const parameterString = querystring.stringify(data);
   const url = `${EMAIL_API_URL}?${parameterString}`;
 
-  return got.post(url)
+  return got.post(url, options)
   .then(response => {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
     }
 
-    return JSON.parse(response.body);
+    return response.body;
   });
 }
 
@@ -104,6 +136,9 @@ function logErrorDataFor(response, url) {
 }
 
 module.exports = {
+  displayDateFor,
+  getServerDate,
+  replaceDisplayData,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify
