@@ -1,4 +1,3 @@
-const dateFormat = require("dateformat");
 const logger = require("./logger");
 const got = require("got");
 const querystring = require("querystring");
@@ -10,7 +9,6 @@ const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "support@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
-const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
 const ONE_MINUTE = 60000;
 
 function updateDisplayStatusListAndNotify(list) {
@@ -62,18 +60,9 @@ function displayDateFor(display) {
   return new Date(utc.getTime() + displayOffset);
 }
 
-function replaceDisplayData(text, display, displayDate) {
-  const formattedTimestamp =
-    dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
-
-  return text.replace(/DISPLAYID/g, display.displayId)
-  .replace(/DISPLAYNAME/g, display.displayName)
-  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
-}
-
 function prepareAndSendEmail(template, display, recipients) {
   const displayDate = displayDateFor(display);
-  const subject = replaceDisplayData(SUBJECT_LINE, display, displayDate);
+  const subject = template.subjectForDisplay(display, displayDate);
   const text = template.textForDisplay(display, displayDate);
 
   const promises = recipients.map(recipient=>{
@@ -127,7 +116,6 @@ function logErrorDataFor(response, url) {
 module.exports = {
   displayDateFor,
   getServerDate,
-  replaceDisplayData,
   sendFailureEmail,
   sendRecoveryEmail,
   updateDisplayStatusListAndNotify

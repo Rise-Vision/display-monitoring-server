@@ -1,7 +1,9 @@
 const dateFormat = require("dateformat");
 const fs = require("fs");
 
-function loadTemplate(name) {
+const SUBJECT_LINE = "Display monitoring for display DISPLAYID";
+
+function loadFromFile(name) {
   const path = require.resolve(`./${name}.html`);
 
   return fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
@@ -17,7 +19,11 @@ function replaceDisplayData(text, display, displayDate) {
 }
 
 function Template(source) {
-  this.body = loadTemplate(source);
+  this.body = loadFromFile(source);
+
+  this.subjectForDisplay = function(display, displayDate) {
+    return replaceDisplayData(SUBJECT_LINE, display, displayDate);
+  }
 
   this.textForDisplay = function(display, displayDate) {
     return replaceDisplayData(this.body, display, displayDate);
