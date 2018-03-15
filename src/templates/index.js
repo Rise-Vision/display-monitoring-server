@@ -16,13 +16,16 @@ function replaceDisplayData(text, display, displayDate) {
   .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
 }
 
-function Template(body) {
+function Template(source) {
+  this.body = loadTemplate(source);
+
   this.textForDisplay = function(display, displayDate) {
-    return replaceDisplayData(body, display, displayDate);
+    return replaceDisplayData(this.body, display, displayDate);
   }
 }
 
 module.exports = {
-  failure: new Template(loadTemplate("monitor-offline-email")),
-  recovery: new Template(loadTemplate("monitor-online-email"))
+  failure: new Template("monitor-offline-email"),
+  recovery: new Template("monitor-online-email"),
+  replaceDisplayData
 };
