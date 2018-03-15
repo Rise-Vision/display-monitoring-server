@@ -18,8 +18,8 @@ function replaceDisplayData(text, display, displayDate) {
   .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
 }
 
-function Template(source) {
-  this.body = loadFromFile(source);
+function Template(options) {
+  this.body = loadFromFile(options.body);
 
   this.subjectForDisplay = function(display, displayDate) {
     return replaceDisplayData(SUBJECT_LINE, display, displayDate);
@@ -31,7 +31,11 @@ function Template(source) {
 }
 
 module.exports = {
-  failure: new Template("monitor-offline-email"),
-  recovery: new Template("monitor-online-email"),
+  failure: new Template({
+    body: "monitor-offline-email"
+  }),
+  recovery: new Template({
+    body: "monitor-online-email"
+  }),
   replaceDisplayData
 };
