@@ -8,12 +8,14 @@ function loadFromFile(name) {
 }
 
 function replaceDisplayData(text, display, displayDate) {
-  const formattedTimestamp =
-    dateFormat(displayDate, "mmm dd yyyy, 'at' HH:MMTT");
+  const formattedDate = dateFormat(displayDate, "mmm dd yyyy");
+  const formattedTime = dateFormat(displayDate, "HH:MMTT");
+  const formattedTimestamp = `${formattedDate}, at ${formattedTime}`;
 
   return text.replace(/DISPLAYID/g, display.displayId)
   .replace(/DISPLAYNAME/g, display.displayName)
-  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp);
+  .replace(/FORMATTEDTIMESTAMP/g, formattedTimestamp)
+  .replace(/FORMATTEDTIME/g, formattedTime);
 }
 
 function Template(options) {
