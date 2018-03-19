@@ -142,8 +142,8 @@ from parsedDisplays
 where parsedDisplays.weekDays is null
 )
 where
-  ((weekDay.active = true and weekDay.day = currentWeekDay(timeZoneOffset)) or (weekDay.active is null and weekDay.day is null)) and
-  ((startTime <= currentTime(timeZoneOffset) or startTime is null) and (currentTime(timeZoneOffset) <= endTime or endTime is null))
+  ((weekDay.active = true and weekDay.day = currentWeekDay(0)) or (weekDay.active is null and weekDay.day is null)) and
+  ((startTime <= currentTime(0) or startTime is null) and (currentTime(0) <= endTime or endTime is null))
 )
 
 select
