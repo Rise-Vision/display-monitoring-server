@@ -139,7 +139,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "monitor@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'b@example.com');
-        assert.equal(parameters.subject, "Main Hall disconnected at 04:00AM and is now offline");
+        assert.equal(parameters.subject, "Main Hall disconnected and is now offline");
         assert(!parameters.text);
 
         assert.equal(typeof options, "object");
@@ -148,7 +148,6 @@ describe("Notifier - Unit", () => {
         assert.equal(typeof options.body.text, "string");
         assert(options.body.text.indexOf("ABC") > 0);
         assert(options.body.text.indexOf("Main Hall") > 0);
-        assert(options.body.text.indexOf("Mar 14 2018, at 04:00AM") > 0);
       });
     });
 
@@ -175,7 +174,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "monitor@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'd@example.com');
-        assert.equal(parameters.subject, "Corridor reconnected at 10:00AM and is now online");
+        assert.equal(parameters.subject, "Corridor reconnected and is now online");
         assert(!parameters.text);
 
         assert.equal(typeof options, "object");
@@ -184,9 +183,6 @@ describe("Notifier - Unit", () => {
         assert.equal(typeof options.body.text, "string");
         assert(options.body.text.indexOf("DEF") > 0);
         assert(options.body.text.indexOf("Corridor") > 0);
-
-        // No explicit offset, so UTC is reported here.
-        assert(options.body.text.indexOf("Mar 14 2018, at 10:00AM") > 0);
       });
     });
   });
