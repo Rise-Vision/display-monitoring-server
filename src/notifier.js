@@ -33,7 +33,7 @@ function updateDisplayStatusListAndNotify(list) {
         default:
       }
     })
-    .catch(error => console.error(`Error while notifying: ${display}`, error))
+    .catch(error => console.error(`Error while notifying: ${JSON.stringify(display)}`, error))
   }, Promise.resolve());
 }
 
