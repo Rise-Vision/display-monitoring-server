@@ -1,15 +1,24 @@
-const logger = require("./logger");
-const got = require("got");
 const querystring = require("querystring");
+const {JWT} = require("google-auth-library");
 
+const logger = require("./logger");
 const stateManager = require("./state-manager");
 const templates = require("./templates");
 
-const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
+// const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
+const EMAIL_API_URL = "https://lock-down-email-endpoint-dot-rvacore-test.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const RESPONSE_OK = 200;
 const ONE_MINUTE = 60000;
+
+const keys = require('../rvacore-test-e3292b420d02.json');
+
+const apiClient = new JWT({
+  email: keys.client_email,
+  key: keys.private_key,
+  scopes: ['https://www.googleapis.com/auth/userinfo.email']
+});
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
@@ -74,10 +83,7 @@ function prepareAndSendEmail(template, display, recipients) {
     };
 
     const options = {
-      json: true,
-      body: {
-        text: text.replace("EMAIL", recipient)
-      }
+      data: {text: text.replace("EMAIL", recipient)}
     };
 
     return send(data, options);
@@ -91,7 +97,7 @@ function send(data, options) {
   const parameterString = querystring.stringify(data);
   const url = `${EMAIL_API_URL}?${parameterString}`;
 
-  return got.post(url, options)
+  return apiClient.request(Object.assign(options, {url, method: "POST"}))
   .then(response => {
     if (response.statusCode !== RESPONSE_OK) {
       return logErrorDataFor(response, url);
