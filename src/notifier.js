@@ -1,24 +1,11 @@
-const querystring = require("querystring");
-const {JWT} = require("google-auth-library");
-
 const logger = require("./logger");
 const stateManager = require("./state-manager");
 const templates = require("./templates");
+const emailSender = require("./email-sender");
 
-// const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
-const EMAIL_API_URL = "https://lock-down-email-endpoint-dot-rvacore-test.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
-const RESPONSE_OK = 200;
 const ONE_MINUTE = 60000;
-
-const keys = require('../rvacore-test-e3292b420d02.json');
-
-const apiClient = new JWT({
-  email: keys.client_email,
-  key: keys.private_key,
-  scopes: ['https://www.googleapis.com/auth/userinfo.email']
-});
 
 function updateDisplayStatusListAndNotify(list) {
   stateManager.filterUnmonitoredDisplays(list);
@@ -75,48 +62,20 @@ function prepareAndSendEmail(template, display, recipients) {
   const text = template.textForDisplay(display, displayDate);
 
   const promises = recipients.map(recipient=>{
-    const data = {
+    const parameters = {
       from: SENDER_ADDRESS,
       fromName: SENDER_NAME,
       recipients: recipient,
       subject
     };
 
-    const options = {
-      data: {text: text.replace("EMAIL", recipient)}
-    };
+    const content = text.replace("EMAIL", recipient);
 
-    return send(data, options);
+    return emailSender.send(parameters, content);
   });
 
   return Promise.all(promises)
   .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
-}
-
-function send(data, options) {
-  const parameterString = querystring.stringify(data);
-  const url = `${EMAIL_API_URL}?${parameterString}`;
-
-  return apiClient.request(Object.assign(options, {url, method: "POST"}))
-  .then(response => {
-    if (response.statusCode !== RESPONSE_OK) {
-      return logErrorDataFor(response, url);
-    }
-
-    return response.body;
-  });
-}
-
-function logErrorDataFor(response, url) {
-  console.warn(`Email API request returned with error code: ${
-    response.statusCode
-  }, message: ${
-    response.statusMessage
-  }, URL: ${
-    url
-  }`);
-
-  return null;
 }
 
 module.exports = {
