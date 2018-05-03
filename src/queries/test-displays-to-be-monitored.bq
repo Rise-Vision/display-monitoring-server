@@ -1,13 +1,11 @@
 #standardSQL
 SELECT
-  "fake-email-address-1@example.com, fake-email-address-2@example.com" AS monitoringEmails,
+  "andre.cardoso@risevision.com, fake-email-address-1@example.com, fake-email-address-2@example.com" AS monitoringEmails,
   display_id displayId
 FROM
   `client-side-events.Player_Data.configuration`
 WHERE
-  player_name LIKE "%Electron%"
-  AND player_version > "2017.10.01.01.01"
-  AND player_version LIKE "20%"
+  display_id = '9G79NYAHBEMA'
 GROUP BY
   monitoringEmails,
   displayId
