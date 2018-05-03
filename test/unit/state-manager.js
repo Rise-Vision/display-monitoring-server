@@ -1,5 +1,3 @@
-/* eslint-disable max-statements, max-lines, no-magic-numbers */
-/* eslint-env mocha */
 const assert = require("assert");
 
 const stateManager = require("../../src/state-manager.js");

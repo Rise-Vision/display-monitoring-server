@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-/* eslint-disable array-bracket-newline, max-statements, no-magic-numbers */
 const assert = require("assert");
 const got = require("got");
 const querystring = require("querystring");
