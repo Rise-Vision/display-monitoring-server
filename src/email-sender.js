@@ -39,11 +39,14 @@ function send(parameters, content, apiClient = getApiClient()) {
       }
 
       return response.body;
+    })
+    .catch((error) => {
+      console.error(`Error occured when sending email ${url}`, error);
     });
 }
 
 function logErrorDataFor(response, url) {
-  console.warn(`Email API request returned with error code: ${
+  console.error(`Email API request returned with error code: ${
     response.statusCode
     }, message: ${
     response.statusMessage
