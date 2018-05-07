@@ -47,9 +47,9 @@ function send(parameters, content, apiClient = getApiClient()) {
 
 function logErrorDataFor(response, url) {
   console.error(`Email API request returned with error code: ${
-    response.statusCode
+    response.status
     }, message: ${
-    response.statusMessage
+    response.statusText
     }, URL: ${
     url
     }`);
