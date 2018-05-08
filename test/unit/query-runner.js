@@ -1,6 +1,4 @@
-/* eslint-env mocha */
 /* eslint-disable array-bracket-newline */
-
 const assert = require("assert");
 
 const runner = require("../../src/query-runner.js");

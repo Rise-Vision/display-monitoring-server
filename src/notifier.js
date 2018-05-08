@@ -1,14 +1,10 @@
 const logger = require("./logger");
-const got = require("got");
-const querystring = require("querystring");
-
 const stateManager = require("./state-manager");
 const templates = require("./templates");
+const emailSender = require("./email-sender");
 
-const EMAIL_API_URL = "https://rvaserver2.appspot.com/_ah/api/rise/v0/email";
 const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
-const RESPONSE_OK = 200;
 const ONE_MINUTE = 60000;
 
 function updateDisplayStatusListAndNotify(list) {
@@ -66,51 +62,20 @@ function prepareAndSendEmail(template, display, recipients) {
   const text = template.textForDisplay(display, displayDate);
 
   const promises = recipients.map(recipient=>{
-    const data = {
+    const parameters = {
       from: SENDER_ADDRESS,
       fromName: SENDER_NAME,
       recipients: recipient,
       subject
     };
 
-    const options = {
-      json: true,
-      body: {
-        text: text.replace("EMAIL", recipient)
-      }
-    };
+    const content = text.replace("EMAIL", recipient);
 
-    return send(data, options);
+    return emailSender.send(parameters, content);
   });
 
   return Promise.all(promises)
   .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
-}
-
-function send(data, options) {
-  const parameterString = querystring.stringify(data);
-  const url = `${EMAIL_API_URL}?${parameterString}`;
-
-  return got.post(url, options)
-  .then(response => {
-    if (response.statusCode !== RESPONSE_OK) {
-      return logErrorDataFor(response, url);
-    }
-
-    return response.body;
-  });
-}
-
-function logErrorDataFor(response, url) {
-  console.warn(`Email API request returned with error code: ${
-    response.statusCode
-  }, message: ${
-    response.statusMessage
-  }, URL: ${
-    url
-  }`);
-
-  return null;
 }
 
 module.exports = {

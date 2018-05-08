@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 const assert = require("assert");
 const retriever = require("../../src/connection-state-retriever.js");
 

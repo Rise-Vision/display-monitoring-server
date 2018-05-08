@@ -37,3 +37,7 @@ A simple email test utility is provided as:
 ```bash
 node test/manual/send_email.js email1@example.com email2@example.com
 ```
+
+As this requires access to the email API using a service account,
+EMAIL_API_CREDENTIALS environment variable should be set to the
+appropriate key file before running the previous command line.

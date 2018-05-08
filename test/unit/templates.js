@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-/* eslint-disable no-magic-numbers */
 const assert = require("assert");
 const simple = require("simple-mock");
 
