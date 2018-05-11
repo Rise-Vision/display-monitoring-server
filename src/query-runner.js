@@ -5,6 +5,7 @@ const fs = require("fs");
 let client = null;
 const path = require.resolve('./queries/displaysToBeMonitored.bq');
 const query = fs.readFileSync(path, 'utf8'); // eslint-disable-line no-sync
+const QUERY_TIMEOUT = 120000;
 
 function getQuery() {
   return query;
@@ -26,7 +27,7 @@ function invokeQuery(testClient) {
   const invoker = getClient(testClient);
   const options = {query, useLegacySql: false, useQueryCache: false};
 
-  return invoker.query(options);
+  return invoker.query(options, {timeoutMs: QUERY_TIMEOUT});
 }
 
 function asDisplayList(data) {
