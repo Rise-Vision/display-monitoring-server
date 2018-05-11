@@ -1,3 +1,4 @@
+/* eslint-disable max-params, no-magic-numbers */
 const {JWT} = require("google-auth-library");
 const querystring = require("querystring");
 
@@ -32,7 +33,7 @@ function send(parameters, content, apiClient = getApiClient()) {
     data: {text: content}
   };
 
-  return apiClient.request(options)
+  return requestWithRetry(apiClient, options)
     .then(response => {
       if (response.status !== RESPONSE_OK) {
         return logErrorDataFor(response, url);
@@ -43,6 +44,16 @@ function send(parameters, content, apiClient = getApiClient()) {
     .catch((error) => {
       console.error(`Error occured when sending email ${url}`, error);
     });
+}
+
+function requestWithRetry(apiClient, options, retries = 2, delay = 2000) {
+  return apiClient.request(options).catch(error => {
+    if (retries <= 0) {
+      return Promise.reject(error);
+    }
+
+    return new Promise((resolve) => setTimeout(resolve, delay)).then(() => requestWithRetry(apiClient, options, retries - 1, delay));
+  });
 }
 
 function logErrorDataFor(response, url) {
