@@ -84,7 +84,7 @@ currentLicenses as
 select
   CS.companyId as companyId,
   if(((planSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(planCurrentPeriodEndDate) >= currentDate()) or (planSubscriptionStatus = 'Trial' and date(planTrialExpiryDate) >= currentDate()), planPlayerProLicenseCount, 0) +
-  if(((playerProSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(playerProCurrentPeriodEndDate) >= currentDate()), playerProLicenseCount, 0) as totalLicenses,
+  if(((playerProSubscriptionStatus = 'Active' or playerProSubscriptionStatus = 'Cancelled') and date(playerProCurrentPeriodEndDate) >= currentDate()), playerProLicenseCount, 0) as totalLicenses,
   playerProAssignedDisplays
 from `rise-core-log.coreData.companySubscriptions` CS
 inner join (select max(id) as id, companyId from `rise-core-log.coreData.companySubscriptions` where appId = productionApp() group by companyId) CS1 on CS.id = CS1.id
