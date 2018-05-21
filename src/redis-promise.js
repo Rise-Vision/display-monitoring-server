@@ -4,7 +4,7 @@ const {promisify} = require("util");
 module.exports = {
   connectWith(host) {
     const client = redis.createClient({host});
-    const cmds = ["quit", "del", "sadd", "smembers"];
+    const cmds = ["quit", "del", "sadd", "smembers", "set"];
 
     return cmds.reduce((obj, key)=>{
       return {...obj, [key]: promisify(client[key]).bind(client)};

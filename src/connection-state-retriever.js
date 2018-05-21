@@ -13,7 +13,7 @@ module.exports = {
   retrieveState(ids) {
     if (!validParam(ids)) {return invalidParam();}
 
-    const commands = ids.map(displayId=>["sismember", "connections:id", displayId]);
+    const commands = ids.map(displayId=>["get", `connections:id:${displayId}`]);
 
     return redisClient.batch(commands);
   }

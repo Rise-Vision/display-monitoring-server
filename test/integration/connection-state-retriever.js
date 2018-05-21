@@ -6,11 +6,11 @@ const localHost = "127.0.0.1";
 
 const initialConnectedDisplays = ["A", "B", "C"]
 
-let redisClient = null;
+let redis = null;
 
 describe("Connection State - Integration", ()=>{
   before(()=>{
-    redisClient = redisPromise.connectWith(localHost);
+    redis = redisPromise.connectWith(localHost);
   });
 
   beforeEach(()=>{
@@ -18,14 +18,7 @@ describe("Connection State - Integration", ()=>{
     .then(()=>retriever.init(localHost));
   });
 
-  after(()=>redisClient.quit().then(retriever.quit));
-
-  it("hasMockData", ()=>{
-    return redisClient.smembers("connections:id")
-    .then(resp=>{
-      assert.deepEqual(resp.sort(), initialConnectedDisplays.sort());
-    });
-  });
+  after(()=>redis.quit().then(retriever.quit));
 
   it("retrieves connection state for one display", ()=>{
     return retriever.retrieveState(["A"])
@@ -37,7 +30,7 @@ describe("Connection State - Integration", ()=>{
   it("retrieves connection state for multiple displays", ()=>{
     return retriever.retrieveState(["A", "B", "X"])
     .then(resp=>{
-      assert.deepEqual(resp, [1, 1, 0]);
+      assert.deepEqual(resp, [1, 1, null]);
     });
   });
 
@@ -59,8 +52,8 @@ describe("Connection State - Integration", ()=>{
 });
 
 function setUpMockData() {
-  return redisClient.del("connections:id")
-  .then(()=>{
-    return redisClient.sadd("connections:id", ...initialConnectedDisplays);
-  });
+  const displays = initialConnectedDisplays;
+  const dbPromises = displays.map(did=>redis.set(`connections:id:${did}`, 1));
+
+  return Promise.all(dbPromises);
 }
