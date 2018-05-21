@@ -17,7 +17,7 @@ describe("Main - Unit", () => {
       }
     ];
 
-    const statusList = monitoring.generateStatusList(displays, [1, 0, 1]);
+    const statusList = monitoring.generateStatusList(displays, ["1", 0, "1"]);
 
     assert.deepEqual(statusList, [
       {
