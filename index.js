@@ -20,6 +20,8 @@ function generateStatusList(displays, states) {
 }
 
 function monitorDisplays() {
+  logger.log('starting a monitoring cycle');
+
   return runner.readMonitoredDisplays()
   .then(displays => {
     if (displays.length === 0) {
