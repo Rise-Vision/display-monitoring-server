@@ -83,13 +83,24 @@ currentLicenses as
 (
 select
   CS.companyId as companyId,
+  planCompanyId,
   if(((planSubscriptionStatus = 'Active' or planSubscriptionStatus = 'Cancelled') and date(planCurrentPeriodEndDate) >= currentDate()) or (planSubscriptionStatus = 'Trial' and date(planTrialExpiryDate) >= currentDate()), planPlayerProLicenseCount, 0) +
   if(((playerProSubscriptionStatus = 'Active' or playerProSubscriptionStatus = 'Cancelled') and date(playerProCurrentPeriodEndDate) >= currentDate()), playerProLicenseCount, 0) as totalLicenses,
-  playerProAssignedDisplays
+  playerProAssignedDisplays,
+  playerProTotalAssignedDisplays
 from `rise-core-log.coreData.companySubscriptions` CS
 inner join (select max(id) as id, companyId from `rise-core-log.coreData.companySubscriptions` where appId = productionApp() group by companyId) CS1 on CS.id = CS1.id
 where CS.appId = productionApp()
 ),
+
+parentLicenseMerge as (
+select sub.companyId, parent.planCompanyId, parent.totalLicenses, parent.playerProAssignedDisplays, parent.playerProTotalAssignedDisplays from (
+  (select companyId, planCompanyId from currentLicenses where planCompanyId is not null and planCompanyId != "" ) sub left join
+  (select companyId, planCompanyId, totalLicenses, playerProTotalAssignedDisplays, playerProAssignedDisplays from currentLicenses) parent on parent.companyId = sub.planCompanyId
+)),
+
+parentLicenses as (
+select companyId, totalLicenses, ifnull(playerProTotalAssignedDisplays, playerProAssignedDisplays) playerProAssignedDisplays from parentLicenseMerge),
 
 displayAuthorizations as
 (
@@ -99,6 +110,17 @@ select
   CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64) as displayIndex,
   if(totalLicenses > CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64), true, false) as displayAuthorized
 from currentLicenses CL
+cross join unnest(CL.playerProAssignedDisplays) as displayId
+),
+
+parentAuthorizations as
+(
+select
+  companyId,
+  displayId,
+  CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64) as displayIndex,
+  if(totalLicenses > CAST(indexOf(displayId, playerProAssignedDisplays ) as INT64), true, false) as displayAuthorized
+from parentLicenses CL
 cross join unnest(CL.playerProAssignedDisplays) as displayId
 ),
 
@@ -150,7 +172,10 @@ select
   DM.displayId as displayId,
   DM.displayName as displayName,
   DM.monitoringEmails as monitoringEmails,
-  DM.timeZoneOffset as timeZoneOffset
+  DM.timeZoneOffset as timeZoneOffset,
+  DA.displayAuthorized authorizedDirectly,
+  PA.displayAuthorized authorizedByParent
 from displaysScheduledToBeMonitored DM
-inner join displayAuthorizations DA on DM.displayId = DA.displayId and DM.companyId = DA.companyId
-where DA.displayAuthorized = true
+left join displayAuthorizations DA on DM.displayId = DA.displayId and DM.companyId = DA.companyId
+left join parentAuthorizations PA on DM.displayId = PA.displayId and DM.companyId = PA.companyId
+where DA.displayAuthorized = true or PA.displayAuthorized = true
