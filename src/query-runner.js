@@ -33,10 +33,10 @@ function invokeQuery(testClient) {
 function asDisplayList(data) {
   const rows = data[0];
 
-  return rows.map(({displayId, displayName, monitoringEmails, timeZoneOffset}) => {
+  return rows.map(({displayId, displayName, monitoringEmails, timeZoneOffset, shouldBePingedNow}) => {
     const addresses = monitoringEmails.split(/,\s*/);
 
-    return {displayId, displayName, addresses, timeZoneOffset};
+    return {displayId, displayName, addresses, timeZoneOffset, shouldBePingedNow};
   });
 }
 
