@@ -8,9 +8,6 @@ const SENDER_NAME = "Rise Vision Support";
 const ONE_MINUTE = 60000;
 
 function updateDisplayStatusListAndNotify(list) {
-  stateManager.filterUnmonitoredDisplays(list);
-  logger.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
-
   return list.reduce((promise, display) => {
     const {displayId, online, addresses} = display;
 

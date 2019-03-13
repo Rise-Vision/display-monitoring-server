@@ -2,6 +2,7 @@ const logger = require("./src/logger");
 const notifier = require("./src/notifier");
 const runner = require("./src/query-runner");
 const stateRetriever = require("./src/connection-state-retriever");
+const stateManager = require("./state-manager");
 
 const MINUTES = 60000;
 const monitoringInterval = 5 * MINUTES; // eslint-disable-line no-magic-numbers
@@ -29,12 +30,17 @@ function monitorDisplays() {
     }
 
     logger.log(`Checking ${displays.length} displays`);
-    const displayIds = displays.map(display => display.displayId);
 
-    return stateRetriever.retrieveState(displayIds)
+    const displaysForPresenceCheck = displays
+    .filter(display => display.shouldBePingedNow);
+
+    stateManager.filterUnmonitoredDisplays(displays);
+    logger.log(`Current display states: ${JSON.stringify(stateManager.getCurrentDisplayStates())}`)
+
+    return stateRetriever.retrieveState(displaysForPresenceCheck)
     .then(states => {
       logger.log(`States retrieved: ${JSON.stringify(states)}`);
-      const statusList = generateStatusList(displays, states);
+      const statusList = generateStatusList(displaysForPresenceCheck, states);
       logger.log(`Status list generated: ${JSON.stringify(statusList)}`);
 
       return notifier.updateDisplayStatusListAndNotify(statusList);

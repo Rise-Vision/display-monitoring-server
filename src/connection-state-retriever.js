@@ -10,10 +10,10 @@ module.exports = {
   quit() {
     return redisClient.quit();
   },
-  retrieveState(ids) {
-    if (!validParam(ids)) {return invalidParam();}
+  retrieveState(displays) {
+    if (!validParam(displays)) {return invalidParam();}
 
-    const commands = ids.map(displayId=>["get", `connections:id:${displayId}`]);
+    const commands = displays.map(display=>["get", `connections:id:${display.displayId}`]);
 
     return redisClient.batch(commands);
   }
