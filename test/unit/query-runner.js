@@ -24,13 +24,15 @@ describe("QueryRunner - Unit", () => {
           displayId: 'ABC',
           displayName: 'Main display',
           timeZoneOffset: -360,
-          monitoringEmails: 'a@example.com, a2@example.com'
+          monitoringEmails: 'a@example.com, a2@example.com',
+          shouldBePingedNow: false
         },
         {
           displayId: 'DEF',
           displayName: 'Secondary display',
           timeZoneOffset: -360,
-          monitoringEmails: 'd@example.com'
+          monitoringEmails: 'd@example.com',
+          shouldBePingedNow: false
         }
       ]];
 
@@ -41,13 +43,15 @@ describe("QueryRunner - Unit", () => {
           displayId: "ABC",
           displayName: 'Main display',
           timeZoneOffset: -360,
-          addresses: ["a@example.com", "a2@example.com"]
+          addresses: ["a@example.com", "a2@example.com"],
+          shouldBePingedNow: false
         },
         {
           displayId: "DEF",
           displayName: 'Secondary display',
           timeZoneOffset: -360,
-          addresses: ["d@example.com"]
+          addresses: ["d@example.com"],
+          shouldBePingedNow: false
         }
       ]);
     });
@@ -68,13 +72,15 @@ describe("QueryRunner - Unit", () => {
           displayId: 'ABC',
           displayName: 'Main display',
           timeZoneOffset: -360,
-          monitoringEmails: 'a@example.com, a2@example.com'
+          monitoringEmails: 'a@example.com, a2@example.com',
+          shouldBePingedNow: false
         },
         {
           displayId: 'DEF',
           displayName: 'Secondary display',
           timeZoneOffset: -360,
-          monitoringEmails: 'd@example.com'
+          monitoringEmails: 'd@example.com',
+          shouldBePingedNow: false
         }
       ]];
 
@@ -87,13 +93,15 @@ describe("QueryRunner - Unit", () => {
             displayId: "ABC",
             displayName: 'Main display',
             timeZoneOffset: -360,
-            addresses: ["a@example.com", "a2@example.com"]
+            addresses: ["a@example.com", "a2@example.com"],
+            shouldBePingedNow: false
           },
           {
             displayId: "DEF",
             displayName: 'Secondary display',
             timeZoneOffset: -360,
-            addresses: ["d@example.com"]
+            addresses: ["d@example.com"],
+            shouldBePingedNow: false
           }
         ]);
       });

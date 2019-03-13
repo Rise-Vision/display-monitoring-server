@@ -135,7 +135,9 @@ select
   weekDay.day,
   weekDay.active,
   monitoringEmails,
-  timeZoneOffset
+  timeZoneOffset,
+  ((weekDay.active = true and weekDay.day = currentWeekDay(0)) or (weekDay.active is null and weekDay.day is null)) and
+  ((startTime <= currentTime(0) or startTime is null) and (currentTime(0) <= endTime or endTime is null)) shouldBePingedNow
 from
 (
 select
@@ -162,11 +164,7 @@ select
   timeZoneOffset
 from parsedDisplays
 where parsedDisplays.weekDays is null
-)
-where
-  ((weekDay.active = true and weekDay.day = currentWeekDay(0)) or (weekDay.active is null and weekDay.day is null)) and
-  ((startTime <= currentTime(0) or startTime is null) and (currentTime(0) <= endTime or endTime is null))
-)
+))
 
 select
   DM.displayId as displayId,
@@ -174,7 +172,8 @@ select
   DM.monitoringEmails as monitoringEmails,
   DM.timeZoneOffset as timeZoneOffset,
   DA.displayAuthorized authorizedDirectly,
-  PA.displayAuthorized authorizedByParent
+  PA.displayAuthorized authorizedByParent,
+  shouldBePingedNow
 from displaysScheduledToBeMonitored DM
 left join displayAuthorizations DA on DM.displayId = DA.displayId and DM.companyId = DA.companyId
 left join parentAuthorizations PA on DM.displayId = PA.displayId and DM.companyId = PA.companyId
