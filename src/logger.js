@@ -1,4 +1,4 @@
-let debugMode = process.env.NODE_ENV === "test";
+let debugMode = true;
 
 module.exports = {
   debugToggle() {
