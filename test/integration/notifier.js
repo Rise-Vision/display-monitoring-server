@@ -55,6 +55,7 @@ describe("Notifier - Integration", () => {
       });
 
       // ABC goes offline, DEF continues offline, GHI not followed this time
+      stateManager.filterUnmonitoredDisplays([{displayId: 'ABC'}, {displayId: 'DEF'}]);
       return notifier.updateDisplayStatusListAndNotify([
         {
           displayId: 'ABC', online: false, addresses: ['a@example.com']

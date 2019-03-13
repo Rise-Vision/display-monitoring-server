@@ -21,34 +21,45 @@ describe("Main - Integration", () => {
     stateManager.reset();
   });
 
+  let JKLScheduled = false;
   it("should iterate and notify accordingly", done => {
-    simple.mock(runner, "readMonitoredDisplays").resolveWith([
+    simple.mock(runner, "readMonitoredDisplays").callFn(() => Promise.resolve([
       {
         displayId: 'ABC',
         displayName: 'Main Hall',
         timeZoneOffset: -360,
-        addresses: ['a@example.com']
+        addresses: ['a@example.com'],
+        shouldBePingedNow: true
       },
       {
         displayId: 'DEF',
         displayName: 'Corridor',
         timeZoneOffset: -360,
-        addresses: ['d@example.com']
+        addresses: ['d@example.com'],
+        shouldBePingedNow: true
       },
       {
         displayId: 'GHI',
         displayName: 'Back door',
         timeZoneOffset: -360,
-        addresses: ['g@example.com']
+        addresses: ['g@example.com'],
+        shouldBePingedNow: true
+      },
+      {
+        displayId: 'JKL',
+        displayName: 'Scheduled',
+        timeZoneOffset: -360,
+        addresses: ['g@example.com'],
+        shouldBePingedNow: JKLScheduled
       }
-    ]);
+    ]));
 
     const states = [
       ["1", 0, 0],
-      [0, 0, "1"],
+      [0, 0, "1", 0],
       [0, 0, 0],
-      ["1", 0, 0],
-      ["1", "1", 0],
+      ["1", 0, 0, 0],
+      ["1", "1", 0, "1"],
       [0, "1", "1"],
       [0, 0, "1"],
       ["1", 0, "1"]
@@ -68,9 +79,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'OK', count: 1},
           'DEF': {state: 'FAILED', count: 1},
-          'GHI': {state: 'FAILED', count: 1}
+          'GHI': {state: 'FAILED', count: 1},
+          'JKL': undefined
         });
 
+        JKLScheduled = true;
         return action();
       })
       .then(() => {
@@ -80,9 +93,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'FAILED', count: 1},
           'DEF': {state: 'FAILED', count: 2},
-          'GHI': {state: 'OK', count: 1}
+          'GHI': {state: 'OK', count: 1},
+          'JKL': {state: 'FAILED', count: 1}
         });
 
+        JKLScheduled = false;
         return action();
       })
       .then(() => {
@@ -97,9 +112,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'FAILED', count: 2},
           'DEF': {state: 'ALERTED', count: 1},
-          'GHI': {state: 'FAILED', count: 1}
+          'GHI': {state: 'FAILED', count: 1},
+          'JKL': {state: 'FAILED', count: 1}
         });
 
+        JKLScheduled = true;
         return action();
       })
       .then(() => {
@@ -111,9 +128,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'OK', count: 1},
           'DEF': {state: 'ALERTED', count: 1},
-          'GHI': {state: 'FAILED', count: 2}
+          'GHI': {state: 'FAILED', count: 2},
+          'JKL': {state: 'FAILED', count: 2}
         });
 
+        JKLScheduled = true;
         return action();
       })
       .then(() => {
@@ -128,9 +147,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'OK', count: 1},
           'DEF': {state: 'RECOVERING', count: 1},
-          'GHI': {state: 'ALERTED', count: 1}
+          'GHI': {state: 'ALERTED', count: 1},
+          'JKL': {state: 'OK', count: 1}
         });
 
+        JKLScheduled = false;
         return action();
       })
       .then(() => {
@@ -140,9 +161,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'FAILED', count: 1},
           'DEF': {state: 'RECOVERING', count: 2},
-          'GHI': {state: 'RECOVERING', count: 1}
+          'GHI': {state: 'RECOVERING', count: 1},
+          'JKL': {state: 'OK', count: 1}
         });
 
+        JKLScheduled = false;
         return action();
       })
       .then(() => {
@@ -152,9 +175,11 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'FAILED', count: 2},
           'DEF': {state: 'ALERTED', count: 1},
-          'GHI': {state: 'RECOVERING', count: 2}
+          'GHI': {state: 'RECOVERING', count: 2},
+          'JKL': {state: 'OK', count: 1}
         });
 
+        JKLScheduled = false;
         return action();
       })
       .then(() => {
@@ -170,7 +195,8 @@ describe("Main - Integration", () => {
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'OK', count: 1},
           'DEF': {state: 'ALERTED', count: 1},
-          'GHI': {state: 'OK', count: 1}
+          'GHI': {state: 'OK', count: 1},
+          'JKL': {state: 'OK', count: 1}
         });
 
         done();
