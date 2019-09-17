@@ -72,7 +72,7 @@ function prepareAndSendEmail(template, display, recipients) {
   });
 
   return Promise.all(promises)
-  .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")}`))
+  .then(() => logger.log(`Mail '${subject}' sent to ${recipients.join(", ")} for ${display.displayId}`))
 }
 
 module.exports = {
