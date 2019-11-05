@@ -128,7 +128,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "support@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'b@example.com');
-        assert.equal(parameters.subject, "Main Hall disconnected and is now offline");
+        assert.equal(parameters.subject, "Display Monitoring: Main Hall disconnected and is now offline");
         assert.ok(!parameters.text);
 
         assert.ok(content.indexOf("ABC") > 0);
@@ -155,7 +155,7 @@ describe("Notifier - Unit", () => {
         assert.equal(parameters.from, "support@risevision.com");
         assert.equal(parameters.fromName, "Rise Vision Support");
         assert.equal(parameters.recipients, 'd@example.com');
-        assert.equal(parameters.subject, "Corridor reconnected and is now online");
+        assert.equal(parameters.subject, "Display Monitoring: Corridor reconnected and is now online");
         assert.ok(!parameters.text);
 
         assert.ok(content.indexOf("DEF") > 0);

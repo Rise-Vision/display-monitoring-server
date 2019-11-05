@@ -18,7 +18,7 @@ describe("Email Sender - Unit", () => {
       from: "support@risevision.com",
       fromName: "Rise Vision Support",
       recipients: "b@example.com",
-      subject: "Main Hall disconnected and is now offline"
+      subject: "Display Monitoring: Main Hall disconnected and is now offline"
     };
 
     return emailSender.send(parameters, 'content', apiClient)
@@ -35,7 +35,7 @@ describe("Email Sender - Unit", () => {
         assert.equal(queryParams.from, "support@risevision.com");
         assert.equal(queryParams.fromName, "Rise Vision Support");
         assert.equal(queryParams.recipients, 'b@example.com');
-        assert.equal(queryParams.subject, "Main Hall disconnected and is now offline");
+        assert.equal(queryParams.subject, "Display Monitoring: Main Hall disconnected and is now offline");
 
         assert.equal(data.text, 'content');
       });
