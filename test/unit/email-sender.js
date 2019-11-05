@@ -15,7 +15,7 @@ describe("Email Sender - Unit", () => {
     });
 
     const parameters = {
-      from: "support@risevision.com",
+      from: "monitor@risevision.com",
       fromName: "Rise Vision Support",
       recipients: "b@example.com",
       subject: "Main Hall disconnected and is now offline"
@@ -32,7 +32,7 @@ describe("Email Sender - Unit", () => {
 
         const queryParams = querystring.parse(parameterString);
 
-        assert.equal(queryParams.from, "support@risevision.com");
+        assert.equal(queryParams.from, "monitor@risevision.com");
         assert.equal(queryParams.fromName, "Rise Vision Support");
         assert.equal(queryParams.recipients, 'b@example.com');
         assert.equal(queryParams.subject, "Main Hall disconnected and is now offline");

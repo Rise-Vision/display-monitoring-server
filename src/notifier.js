@@ -3,7 +3,7 @@ const stateManager = require("./state-manager");
 const templates = require("./templates");
 const emailSender = require("./email-sender");
 
-const SENDER_ADDRESS = "support@risevision.com";
+const SENDER_ADDRESS = "monitor@risevision.com";
 const SENDER_NAME = "Rise Vision Support";
 const ONE_MINUTE = 60000;
 
