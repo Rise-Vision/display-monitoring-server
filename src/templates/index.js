@@ -33,11 +33,11 @@ function Template(options) {
 module.exports = {
   failure: new Template({
     body: "monitor-offline-email",
-    subject: "DISPLAYNAME disconnected and is now offline"
+    subject: "Display Monitoring: DISPLAYNAME disconnected and is now offline"
   }),
   recovery: new Template({
     body: "monitor-online-email",
-    subject: "DISPLAYNAME reconnected and is now online"
+    subject: "Display Monitoring: DISPLAYNAME reconnected and is now online"
   }),
   replaceDisplayData
 };
