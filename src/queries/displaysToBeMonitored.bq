@@ -31,6 +31,11 @@ create temporary function currentWeekDay(offset FLOAT64)
     as (format_timestamp('%A', timestamp_add(current_timestamp(), interval CAST(offset as INT64) minute)));
     --as ('Friday');
 
+create temporary function currentWeekDayAbbrev(offset FLOAT64)
+  returns STRING
+    as (format_timestamp('%a', timestamp_add(current_timestamp(), interval CAST(offset as INT64) minute)));
+    --as ('Fri');
+
 create temporary function currentTime(offset FLOAT64)
   returns TIME
     as (time_add(current_time(), interval CAST(offset as INT64) minute));
@@ -136,7 +141,7 @@ select
   weekDay.active,
   monitoringEmails,
   timeZoneOffset,
-  ((weekDay.active = true and weekDay.day = currentWeekDay(0)) or (weekDay.active is null and weekDay.day is null)) and
+  ((weekDay.active = true and weekDay.day in (currentWeekDay(0), currentWeekDayAbbrev(0))) or (weekDay.active is null and weekDay.day is null)) and
   ((startTime <= currentTime(0) or startTime is null) and (currentTime(0) <= endTime or endTime is null)) shouldBePingedNow
 from
 (
