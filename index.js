@@ -4,8 +4,9 @@ const runner = require("./src/query-runner");
 const stateRetriever = require("./src/connection-state-retriever");
 const stateManager = require("./src/state-manager");
 
-const MINUTES = 60000;
-const monitoringInterval = 5 * MINUTES; // eslint-disable-line no-magic-numbers
+const MINUTE_MS = 60000;
+const CYCLE_MINS = 5;
+const monitoringInterval = CYCLE_MINS * MINUTE_MS;
 
 process.on("SIGUSR2", logger.debugToggle);
 Error.stackTraceLimit = 50;
@@ -61,7 +62,7 @@ function run(schedule = setInterval) {
 module.exports = {generateStatusList, monitorDisplays, run};
 
 if (process.env.NODE_ENV !== "test") {
-  console.log(`Monitoring at ${monitoringInterval / MINUTES} minute intervals`);
+  console.log(`Monitoring at ${monitoringInterval / MINUTE_MS} minute intervals`);
   stateRetriever.init();
   run();
 }

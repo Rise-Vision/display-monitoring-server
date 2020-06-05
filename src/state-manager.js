@@ -1,6 +1,8 @@
 /* eslint-disable no-magic-numbers, default-case */
 
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
+const TRANSITION_THRESHOLD = 2;
+
 let currentDisplayStates = {};
 
 function filterUnmonitoredDisplays(list) {
@@ -26,7 +28,7 @@ function updateAsOnline(entry) {
     case 'ALERTED': return change(entry, 'RECOVERING');
     case 'FAILED': return change(entry, 'OK');
     case 'RECOVERING':
-      if (entry.count >= 2) {
+      if (entry.count >= TRANSITION_THRESHOLD) {
         change(entry, 'OK');
         return "SEND_RECOVERY_EMAIL";
       }
@@ -42,7 +44,7 @@ function updateAsOffline(entry) {
     case 'OK': return change(entry, 'FAILED');
     case 'RECOVERING': return change(entry, 'ALERTED');
     case 'FAILED':
-      if (entry.count >= 2) {
+      if (entry.count >= TRANSITION_THRESHOLD) {
         change(entry, 'ALERTED');
         return "SEND_FAILURE_EMAIL";
       }
@@ -68,7 +70,6 @@ function updateDisplayStatus(displayId, online) {
   return online ? updateAsOnline(displayState) : updateAsOffline(displayState);
 }
 
-// For inspection during testing only.
 function getCurrentDisplayStates() {
   return currentDisplayStates;
 }
