@@ -1,7 +1,9 @@
-/* eslint-disable no-magic-numbers, default-case */
-
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
+const logger = require("./logger");
+const DATA_PATH = process.env.DATA_PATH || __dirname;
 const TRANSITION_THRESHOLD = 2;
+const PERSIST_FILE_PATH = require("path").join(DATA_PATH, "saved-states.json");
+const fs = require("fs");
 
 let currentDisplayStates = {};
 
@@ -74,14 +76,25 @@ function getCurrentDisplayStates() {
   return currentDisplayStates;
 }
 
-// For testing purposes only.
-function reset() {
-  currentDisplayStates = {};
+function setCurrentDisplayStates(states = {}) {
+  currentDisplayStates = Object.assign({}, states);
+}
+
+function init() {
+  try {
+    module.exports.setCurrentDisplayStates(require(PERSIST_FILE_PATH));
+    logger.log(`Loaded ${Object.keys(currentDisplayStates).length} display states.`);
+  } catch (err) {
+    logger.log(`No saved states loaded from: ${PERSIST_FILE_PATH}`);
+    logger.log(err);
+  }
+
 }
 
 module.exports = {
+  init,
   filterUnmonitoredDisplays,
   updateDisplayStatus,
   getCurrentDisplayStates,
-  reset
+  setCurrentDisplayStates,
 };

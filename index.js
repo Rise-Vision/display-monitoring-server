@@ -64,5 +64,7 @@ module.exports = {generateStatusList, monitorDisplays, run};
 if (process.env.NODE_ENV !== "test") {
   console.log(`Monitoring at ${monitoringInterval / MINUTE_MS} minute intervals`);
   stateRetriever.init();
+  stateManager.init();
+
   run();
 }

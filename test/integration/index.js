@@ -18,7 +18,7 @@ describe("Main - Integration", () => {
 
   afterEach(() => {
     simple.restore();
-    stateManager.reset();
+    stateManager.setCurrentDisplayStates({});
   });
 
   let JKLScheduled = false;
