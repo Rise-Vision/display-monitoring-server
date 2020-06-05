@@ -46,7 +46,8 @@ function monitorDisplays() {
       logger.log(`Status list generated: ${JSON.stringify(statusList)}`);
 
       return notifier.updateDisplayStatusListAndNotify(statusList);
-    });
+    })
+    .then(stateManager.persistCurrentDisplayStates);
   })
   .catch(console.error);
 }

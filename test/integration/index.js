@@ -69,6 +69,8 @@ describe("Main - Integration", () => {
       Promise.resolve(states.shift())
     );
 
+    simple.mock(stateManager, "persistCurrentDisplayStates").returnWith();
+
     monitoring.run((action, interval) => {
       assert.equal(interval, 300000);
 
@@ -89,6 +91,7 @@ describe("Main - Integration", () => {
       .then(() => {
         assert(!notifier.sendFailureEmail.called);
         assert(!notifier.sendRecoveryEmail.called);
+        assert(stateManager.persistCurrentDisplayStates.called);
 
         assert.deepEqual(stateManager.getCurrentDisplayStates(), {
           'ABC': {state: 'FAILED', count: 1},

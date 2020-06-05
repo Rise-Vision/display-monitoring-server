@@ -80,6 +80,10 @@ function setCurrentDisplayStates(states = {}) {
   currentDisplayStates = Object.assign({}, states);
 }
 
+function persistCurrentDisplayStates() {
+  fs.writeFileSync(PERSIST_FILE_PATH, JSON.stringify(currentDisplayStates));
+}
+
 function init() {
   try {
     module.exports.setCurrentDisplayStates(require(PERSIST_FILE_PATH));
@@ -97,4 +101,5 @@ module.exports = {
   updateDisplayStatus,
   getCurrentDisplayStates,
   setCurrentDisplayStates,
+  persistCurrentDisplayStates
 };
