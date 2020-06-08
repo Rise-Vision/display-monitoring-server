@@ -15,7 +15,7 @@ describe("Notifier - Integration", () => {
 
   afterEach(() => {
     simple.restore();
-    stateManager.reset();
+    stateManager.setCurrentDisplayStates({});
   });
 
   it("should notify or not depending on the current display state", () => {

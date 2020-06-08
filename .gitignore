@@ -60,3 +60,5 @@ typings/
 # redis db
 dump.rdb
 /.project
+
+saved-states.json

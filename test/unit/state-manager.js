@@ -4,7 +4,7 @@ const stateManager = require("../../src/state-manager.js");
 
 describe("State Manager - Unit", () => {
 
-  afterEach(() => stateManager.reset());
+  afterEach(() => stateManager.setCurrentDisplayStates({}));
 
   it("should filter states not present in current list", () => {
     stateManager.updateDisplayStatus("A123", true);
@@ -352,4 +352,11 @@ describe("State Manager - Unit", () => {
     }
   });
 
+  it("should set display states", ()=>{
+    stateManager.setCurrentDisplayStates(undefined);
+    assert.deepEqual(stateManager.getCurrentDisplayStates(), {});
+
+    stateManager.setCurrentDisplayStates({one: 1});
+    assert.deepEqual(stateManager.getCurrentDisplayStates(), {one: 1});
+  });
 });

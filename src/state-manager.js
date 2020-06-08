@@ -1,6 +1,10 @@
-/* eslint-disable no-magic-numbers, default-case */
-
 // Display ids are used as keys, the value is a structure with state and count of times it has been in that status
+const logger = require("./logger");
+const DATA_PATH = process.env.DATA_PATH || __dirname;
+const TRANSITION_THRESHOLD = 2;
+const PERSIST_FILE_PATH = require("path").join(DATA_PATH, "saved-states.json");
+const fs = require("fs");
+
 let currentDisplayStates = {};
 
 function filterUnmonitoredDisplays(list) {
@@ -26,7 +30,7 @@ function updateAsOnline(entry) {
     case 'ALERTED': return change(entry, 'RECOVERING');
     case 'FAILED': return change(entry, 'OK');
     case 'RECOVERING':
-      if (entry.count >= 2) {
+      if (entry.count >= TRANSITION_THRESHOLD) {
         change(entry, 'OK');
         return "SEND_RECOVERY_EMAIL";
       }
@@ -42,7 +46,7 @@ function updateAsOffline(entry) {
     case 'OK': return change(entry, 'FAILED');
     case 'RECOVERING': return change(entry, 'ALERTED');
     case 'FAILED':
-      if (entry.count >= 2) {
+      if (entry.count >= TRANSITION_THRESHOLD) {
         change(entry, 'ALERTED');
         return "SEND_FAILURE_EMAIL";
       }
@@ -68,19 +72,34 @@ function updateDisplayStatus(displayId, online) {
   return online ? updateAsOnline(displayState) : updateAsOffline(displayState);
 }
 
-// For inspection during testing only.
 function getCurrentDisplayStates() {
   return currentDisplayStates;
 }
 
-// For testing purposes only.
-function reset() {
-  currentDisplayStates = {};
+function setCurrentDisplayStates(states = {}) {
+  currentDisplayStates = Object.assign({}, states);
+}
+
+function persistCurrentDisplayStates() {
+  fs.writeFileSync(PERSIST_FILE_PATH, JSON.stringify(currentDisplayStates));
+}
+
+function init() {
+  try {
+    module.exports.setCurrentDisplayStates(require(PERSIST_FILE_PATH));
+    logger.log(`Loaded ${Object.keys(currentDisplayStates).length} display states.`);
+  } catch (err) {
+    logger.log(`No saved states loaded from: ${PERSIST_FILE_PATH}`);
+    logger.log(err);
+  }
+
 }
 
 module.exports = {
+  init,
   filterUnmonitoredDisplays,
   updateDisplayStatus,
   getCurrentDisplayStates,
-  reset
+  setCurrentDisplayStates,
+  persistCurrentDisplayStates
 };
