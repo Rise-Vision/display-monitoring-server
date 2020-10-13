@@ -55,14 +55,14 @@ describe("Main - Integration", () => {
     ]));
 
     const states = [
-      ["1", 0, 0],
-      [0, 0, "1", 0],
-      [0, 0, 0],
-      ["1", 0, 0, 0],
-      ["1", "1", 0, "1"],
-      [0, "1", "1"],
-      [0, 0, "1"],
-      ["1", 0, "1"]
+      ["1", null, null],
+      [null, null, "1", null],
+      [null, null, null],
+      ["1", null, null, null],
+      ["1", "1", null, "1"],
+      [null, "1", "1"],
+      [null, null, "1"],
+      ["1", null, "1"]
     ];
 
     simple.mock(stateRetriever, "retrieveState").callFn(() =>
@@ -204,6 +204,11 @@ describe("Main - Integration", () => {
 
         done();
       })
+      .catch(err=>{
+        console.error(`ERROR on ${err.operator}`);
+        console.log("Actual:", err.actual, "Expected:", err.expected);
+        console.log(err.stack)
+      });
     });
   });
 

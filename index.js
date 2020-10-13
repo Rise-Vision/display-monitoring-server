@@ -15,7 +15,7 @@ let timerId = null;
 
 function generateStatusList(displays, states) {
   return displays.map((display, index) => {
-    const online = states[index] === "1";
+    const online = states[index] !== null;
 
     return Object.assign({online}, display);
   });
