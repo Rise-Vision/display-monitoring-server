@@ -8,6 +8,7 @@ const notifier = require("../../src/notifier");
 const runner = require("../../src/query-runner");
 const stateManager = require("../../src/state-manager");
 const stateRetriever = require("../../src/connection-state-retriever");
+const massOutageBypass = require("../../src/mass-outage-bypass");
 
 describe("Main - Integration", () => {
 
@@ -70,6 +71,8 @@ describe("Main - Integration", () => {
     );
 
     simple.mock(stateManager, "persistCurrentDisplayStates").returnWith();
+
+    simple.mock(massOutageBypass, "shouldBypass").returnWith(false);
 
     monitoring.run((action, interval) => {
       assert.equal(interval, 300000);
