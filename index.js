@@ -2,6 +2,7 @@ const logger = require("./src/logger");
 const notifier = require("./src/notifier");
 const runner = require("./src/query-runner");
 const stateRetriever = require("./src/connection-state-retriever");
+const massOutageBypass = require("./src/mass-outage-bypass");
 const stateManager = require("./src/state-manager");
 
 const MINUTE_MS = 60000;
@@ -42,6 +43,11 @@ function monitorDisplays() {
     return stateRetriever.retrieveState(displaysForPresenceCheck)
     .then(states => {
       logger.log(`States retrieved: ${JSON.stringify(states)}`);
+
+      if (massOutageBypass.shouldBypass(states)) {
+        return logger.log(`Bypassing state update due to mass outage`);
+      }
+
       const statusList = generateStatusList(displaysForPresenceCheck, states);
       logger.log(`Status list generated: ${JSON.stringify(statusList)}`);
 
