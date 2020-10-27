@@ -1,5 +1,5 @@
 const logger = require("./logger");
-const MASS_OUTAGE_THRESHOLD = 0.2;
+const MASS_OUTAGE_THRESHOLD = 0.4;
 
 module.exports = {
   shouldBypass(states = []) {
