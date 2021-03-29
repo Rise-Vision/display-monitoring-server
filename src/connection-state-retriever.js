@@ -1,5 +1,5 @@
 const redisPromise = require("./redis-promise.js");
-const gkeHostname = "display-ms-redis-master";
+const gkeHostname = "display-ms-redis-primary";
 
 let redisClient = null;
 
